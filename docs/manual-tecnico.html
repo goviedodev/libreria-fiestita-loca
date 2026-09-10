@@ -982,6 +982,76 @@ npx wrangler secret put WHATSAPP_NUMERO  <span class="comentario"># número del 
 				existe, así que se pueden dejar listos antes del primer despliegue.
 			</p>
 
+			<h3>El token de acceso al backoffice</h3>
+			<p>
+				No hay usuarios ni correos: <code>ADMIN_TOKEN</code> es una única llave. Hay
+				<strong>dos valores distintos</strong>, uno por entorno, y se obtienen de forma muy
+				diferente.
+			</p>
+
+			<h4>En local</h4>
+			<p>
+				<code>run.sh</code> crea <code>.dev.vars</code> la primera vez con un valor fijo, y lo
+				imprime en pantalla al hacerlo:
+			</p>
+			<pre><code>ADMIN_TOKEN="fiestita-local"</code></pre>
+			<p>
+				Con eso se entra a <code>localhost:5173/admin</code>. No es un secreto: es un marcador de
+				desarrollo, ya visible en <code>run.sh</code>, que está versionado. El archivo
+				<code>.dev.vars</code> en cambio está en <code>.gitignore</code> y nunca se sube. Para
+				consultarlo:
+			</p>
+			<pre><code>grep ADMIN_TOKEN .dev.vars</code></pre>
+
+			<h4>En producción</h4>
+			<div class="nota nota--trampa">
+				<span class="nota__titulo">No se puede recuperar</span>
+				Los secrets de Cloudflare son de <strong>solo escritura</strong>.
+				<code>wrangler secret list</code> confirma que existen y de qué tipo son, pero
+				<strong>nunca devuelve el valor</strong> — ni por CLI, ni por API, ni desde el panel. Si el
+				token de producción se perdió, no hay forma de leerlo: solo definir uno nuevo.
+			</div>
+
+			<pre><code>openssl rand -base64 24              <span class="comentario"># generar uno largo y aleatorio</span>
+npx wrangler secret put ADMIN_TOKEN  <span class="comentario"># lo pide por teclado, no queda en el historial</span></code></pre>
+
+			<p>
+				Toma efecto de inmediato, sin volver a desplegar. Conviene guardarlo en un gestor de
+				contraseñas <em>antes</em> de pegarlo, porque después ya no se puede consultar.
+			</p>
+
+			<h4>Rotar no es lo mismo que revocar</h4>
+			<div class="tabla-caja">
+				<table>
+					<thead><tr><th>Qué rotas</th><th>Qué consigues</th><th>Sesiones abiertas</th></tr></thead>
+					<tbody>
+						<tr>
+							<td class="ruta">ADMIN_TOKEN</td>
+							<td>el token viejo deja de servir para <em>entrar</em></td>
+							<td><strong>siguen válidas</strong></td>
+						</tr>
+						<tr>
+							<td class="ruta">SESSION_SECRET</td>
+							<td>toda cookie existente deja de verificar</td>
+							<td>caen todas, al instante</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<p>
+				La distinción importa: la sesión no guarda el token, guarda una firma HMAC hecha con
+				<code>SESSION_SECRET</code> (ver §05). Si sospechas que el token se filtró, rota
+				<strong>los dos</strong> — el primero para cerrar la puerta, el segundo para echar a quien
+				ya esté adentro.
+			</p>
+
+			<div class="nota nota--ojo">
+				<span class="nota__titulo">Recordatorio</span>
+				El repositorio es público. El token de producción no va en el código, ni en este manual, ni
+				en un <code>.env</code> versionado: vive únicamente en Cloudflare y en tu gestor de
+				contraseñas.
+			</div>
+
 			<h4>Migraciones y despliegue</h4>
 			<pre><code>npx wrangler d1 migrations apply libreria-fiestita-loca --local
 npx wrangler d1 migrations apply libreria-fiestita-loca --remote
