@@ -8,7 +8,22 @@
 		"enabled": true
 	},
 	"upload_source_maps": true,
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "libreria-fiestita-loca",
+			"database_id": "19aaeaa8-209c-484f-b789-a45629929455",
+			"migrations_dir": "migrations"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "IMAGENES",
+			"bucket_name": "fiestita-loca-imagenes"
+		}
+	],
 	"assets": {
+		"binding": "ASSETS",
 		"directory": "./dist/client",
 		"not_found_handling": "single-page-application"
 	}

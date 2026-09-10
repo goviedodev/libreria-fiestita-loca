@@ -1,0 +1,39 @@
+schema: spec-driven
+
+context: |
+  Proyecto: Librería Fiestita Loca (Limache).
+  Stack: React 19 + TypeScript + Vite en el cliente, Hono sobre Cloudflare Workers en el backend.
+  API bajo /api/ en src/worker/index.ts; cliente en src/react-app/.
+  Convenciones: tabs, comillas dobles, TypeScript strict, inmutabilidad, conventional commits.
+  Verificación antes de cerrar un cambio: npm run check (tsc + vite build + wrangler dry-run).
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+# Example:
+#   context: |
+#     Tech stack: TypeScript, React, Node.js
+#     We use conventional commits
+#     Domain: e-commerce platform
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

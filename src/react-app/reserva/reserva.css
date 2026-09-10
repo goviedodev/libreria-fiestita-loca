@@ -1,0 +1,416 @@
+/* Reserva: una sola columna de lectura. Es un formulario que cierra una venta, no
+   una vitrina, así que el ancho se limita y la jerarquía la lleva el total. */
+
+.reserva {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	margin-inline: auto;
+	max-width: 40rem;
+	width: 100%;
+}
+
+.reserva__cargando {
+	color: var(--tinta-tenue);
+	padding: 4rem 0;
+	text-align: center;
+}
+
+.reserva__antetitulo {
+	color: var(--acento);
+	font-size: 0.75rem;
+	letter-spacing: 0.18em;
+	margin: 0;
+	text-transform: uppercase;
+}
+
+.reserva__titulo {
+	font-size: clamp(1.75rem, 1.2rem + 2.4vw, 2.75rem);
+	margin: 0;
+	text-wrap: balance;
+}
+
+.reserva__folio {
+	font-family: ui-monospace, "SF Mono", Menlo, monospace;
+	font-size: 0.85em;
+	letter-spacing: 0.04em;
+	white-space: nowrap;
+}
+
+.reserva__entrada {
+	color: var(--tinta-suave);
+	margin: 0;
+	max-width: 52ch;
+}
+
+.reserva__entrada code {
+	background: var(--papel-hondo);
+	font-size: 0.9em;
+	padding: 0.1em 0.35em;
+}
+
+/* ------------------------------------------------------------------ Lista */
+
+.reserva__lista {
+	border-top: 1px solid var(--borde);
+	display: flex;
+	flex-direction: column;
+	list-style: none;
+	margin: 0.5rem 0 0;
+	padding: 0;
+}
+
+.reserva__item {
+	align-items: center;
+	border-bottom: 1px solid var(--borde);
+	display: flex;
+	gap: 0.9rem;
+	padding: 0.75rem 0;
+}
+
+.reserva__miniatura {
+	flex-shrink: 0;
+	height: 4rem;
+	object-fit: cover;
+	width: 2.75rem;
+}
+
+.reserva__miniatura--vacia {
+	align-items: center;
+	background: var(--papel-hondo);
+	border: 1px solid var(--borde);
+	color: var(--tinta-tenue);
+	display: flex;
+	font-family: var(--serif);
+	font-size: 0.8125rem;
+	justify-content: center;
+}
+
+.reserva__item-datos {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.reserva__item-titulo {
+	color: var(--tinta);
+	font-family: var(--serif);
+	font-size: 1.0625rem;
+	text-decoration: none;
+}
+
+.reserva__item-titulo:hover {
+	color: var(--acento);
+}
+
+.reserva__item-autor {
+	color: var(--tinta-suave);
+	font-size: 0.8125rem;
+}
+
+.reserva__item-precio {
+	font-variant-numeric: tabular-nums;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.reserva__quitar {
+	background: none;
+	border: none;
+	color: var(--tinta-tenue);
+	cursor: pointer;
+	font-size: 0.8125rem;
+	padding: 0.3rem;
+	text-decoration: underline;
+	text-underline-offset: 0.18em;
+}
+
+.reserva__quitar:hover {
+	color: var(--acento);
+}
+
+/* ------------------------------------------------------------------ Total */
+
+.reserva__total {
+	align-items: baseline;
+	display: flex;
+	justify-content: space-between;
+	margin: 0.5rem 0 0;
+}
+
+.reserva__total span {
+	color: var(--tinta-suave);
+	font-size: 0.75rem;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
+
+.reserva__total strong {
+	font-family: var(--serif);
+	font-size: 1.75rem;
+	font-variant-numeric: tabular-nums;
+	font-weight: 600;
+}
+
+/* -------------------------------------------------------------- Formulario */
+
+.reserva__form,
+.reserva__buscador {
+	border-top: 1px solid var(--borde);
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+	margin-top: 1rem;
+	padding-top: 1.5rem;
+}
+
+.reserva__buscador {
+	align-items: end;
+	border-top: none;
+	grid-template-columns: 1fr auto;
+}
+
+.reserva__campo {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+	min-width: 0;
+}
+
+.reserva__campo--completo {
+	grid-column: 1 / -1;
+}
+
+.reserva__etiqueta {
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.reserva__campo input,
+.reserva__campo textarea {
+	background: var(--papel-alto);
+	border: 1px solid var(--borde);
+	border-radius: var(--radio);
+	padding: 0.6rem 0.75rem;
+	transition: border-color var(--rapido) var(--suave);
+	width: 100%;
+}
+
+.reserva__campo textarea {
+	resize: vertical;
+}
+
+.reserva__campo input:focus,
+.reserva__campo textarea:focus {
+	border-color: var(--acento);
+}
+
+.reserva__campo input[aria-invalid="true"] {
+	border-color: var(--acento);
+}
+
+.reserva__ayuda {
+	color: var(--tinta-tenue);
+	font-size: 0.75rem;
+}
+
+.reserva__error-campo {
+	color: var(--acento);
+	font-size: 0.75rem;
+}
+
+.reserva__enviar {
+	align-self: start;
+	background: var(--acento);
+	border: 1px solid var(--acento);
+	border-radius: var(--radio);
+	color: var(--papel);
+	cursor: pointer;
+	font-size: 1rem;
+	grid-column: 1 / -1;
+	justify-self: start;
+	padding: 0.75rem 1.75rem;
+	text-decoration: none;
+	transition: background var(--rapido) var(--suave), transform var(--rapido) var(--suave);
+}
+
+.reserva__buscador .reserva__enviar {
+	grid-column: auto;
+}
+
+.reserva__enviar:hover:not(:disabled) {
+	background: var(--tinta);
+	border-color: var(--tinta);
+	color: var(--papel);
+}
+
+.reserva__enviar:active:not(:disabled) {
+	transform: translateY(1px);
+}
+
+.reserva__enviar:disabled {
+	cursor: not-allowed;
+	opacity: 0.45;
+}
+
+.reserva__enviar--whatsapp {
+	align-self: stretch;
+	justify-self: stretch;
+	text-align: center;
+}
+
+/* ------------------------------------------------------------------ Avisos */
+
+.reserva__aviso {
+	border-left: 2px solid;
+	font-size: 0.9375rem;
+	margin: 0;
+	padding: 0.75rem 0.9rem;
+}
+
+.reserva__aviso p {
+	margin: 0;
+}
+
+.reserva__aviso ul {
+	margin: 0.5rem 0;
+	padding-left: 1.1rem;
+}
+
+.reserva__aviso li {
+	margin-bottom: 0.2rem;
+}
+
+.reserva__aviso--atencion {
+	background: oklch(from var(--ambar) l c h / 0.12);
+	border-color: var(--ambar);
+	color: oklch(38% 0.1 75);
+}
+
+.reserva__aviso--error {
+	background: oklch(from var(--acento) l c h / 0.08);
+	border-color: var(--acento);
+	color: var(--acento);
+	grid-column: 1 / -1;
+}
+
+.reserva__aviso-ayuda {
+	font-size: 0.8125rem;
+	opacity: 0.85;
+}
+
+/* ------------------------------------------------------- Consulta por folio */
+
+.reserva__datos-cliente {
+	border-top: 1px solid var(--borde);
+	display: grid;
+	gap: 0.75rem 1.5rem;
+	grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+	margin: 0.5rem 0 0;
+	padding-top: 1.25rem;
+}
+
+.reserva__datos-cliente dt {
+	color: var(--tinta-tenue);
+	font-size: 0.6875rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.reserva__datos-cliente dd {
+	margin: 0.15rem 0 0;
+}
+
+.reserva__nota {
+	background: var(--papel-hondo);
+	font-size: 0.9375rem;
+	margin: 0;
+	padding: 0.7rem 0.9rem;
+}
+
+.reserva__historial {
+	border-top: 1px solid var(--borde);
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+	list-style: none;
+	margin: 0.5rem 0 0;
+	padding: 1.25rem 0 0;
+}
+
+.reserva__historial li {
+	display: flex;
+	gap: 1rem;
+	justify-content: space-between;
+}
+
+.reserva__historial-estado {
+	font-size: 0.9375rem;
+}
+
+.reserva__historial-fecha {
+	color: var(--tinta-tenue);
+	font-size: 0.8125rem;
+}
+
+.reserva__pie-enlaces {
+	border-top: 1px solid var(--borde);
+	color: var(--tinta-tenue);
+	font-size: 0.875rem;
+	margin: 0.5rem 0 0;
+	padding-top: 1.25rem;
+}
+
+/* --------------------------------------------- Acciones de la ficha */
+
+.ficha__acciones {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	margin-top: 0.5rem;
+}
+
+.ficha__acciones .ficha__reservar {
+	margin-top: 0;
+}
+
+.ficha__quitar {
+	background: none;
+	border: none;
+	color: var(--tinta-tenue);
+	cursor: pointer;
+	font-size: 0.875rem;
+	padding: 0.3rem;
+	text-decoration: underline;
+	text-underline-offset: 0.18em;
+}
+
+.ficha__quitar:hover {
+	color: var(--acento);
+}
+
+/* El botón de reservar es un <button> cuando agrega y un <a> cuando lleva a la
+   reserva: los dos comparten el mismo aspecto. */
+button.ficha__reservar {
+	font-size: 1rem;
+}
+
+/* ------------------------------------------------ Contador de la cabecera */
+
+.cascaron__contador {
+	background: var(--acento);
+	border-radius: 999px;
+	color: var(--papel);
+	display: inline-block;
+	font-size: 0.6875rem;
+	font-variant-numeric: tabular-nums;
+	line-height: 1;
+	margin-left: 0.35rem;
+	min-width: 1.25rem;
+	padding: 0.2rem 0.35rem;
+	text-align: center;
+}

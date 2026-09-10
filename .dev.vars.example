@@ -1,0 +1,11 @@
+# Copia este archivo a .dev.vars para desarrollo local.
+# En producción estos valores se cargan con `npx wrangler secret put <NOMBRE>`.
+
+# Token de acceso al backoffice.
+ADMIN_TOKEN="cambiame-en-local"
+
+# Secreto con el que se firma la cookie de sesión del backoffice.
+SESSION_SECRET="generado-automaticamente-por-run.sh"
+
+# Número de WhatsApp del negocio, formato internacional sin + ni espacios.
+WHATSAPP_NUMERO="56900000000"

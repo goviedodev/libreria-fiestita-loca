@@ -1,0 +1,596 @@
+/* Catálogo: editorial de papel. La rejilla deja respirar cada portada y el título
+   de portada rompe la escala del resto para que la página tenga un punto de
+   entrada claro en vez de ser una grilla uniforme más. */
+
+.catalogo {
+	display: flex;
+	flex-direction: column;
+	gap: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.catalogo__cargando,
+.catalogo__vacio {
+	color: var(--tinta-tenue);
+	padding: clamp(3rem, 8vw, 6rem) 0;
+	text-align: center;
+}
+
+.catalogo__vacio strong {
+	color: var(--tinta);
+	font-style: italic;
+}
+
+.catalogo__vacio-ayuda {
+	font-size: 0.9375rem;
+	margin-top: 0.5rem;
+}
+
+/* ---------------------------------------------------------------- Portada */
+
+.catalogo__portada {
+	border-bottom: 1px solid var(--borde);
+	padding-bottom: clamp(1.25rem, 2.5vw, 2rem);
+}
+
+.catalogo__antetitulo {
+	color: var(--acento);
+	font-size: 0.75rem;
+	letter-spacing: 0.18em;
+	margin: 0 0 0.75rem;
+	text-transform: uppercase;
+}
+
+.catalogo__titulo {
+	font-size: var(--texto-titulo);
+	margin: 0;
+	/* El quiebre lo reparte el navegador. Un <br> a mano se pegaría a la palabra
+	   siguiente en cuanto se ocultara por ancho. */
+	max-width: 14ch;
+	text-wrap: balance;
+}
+
+.catalogo__entrada {
+	color: var(--tinta-suave);
+	margin: 1rem 0 0;
+	max-width: 46ch;
+}
+
+/* ---------------------------------------------------------------- Filtros */
+
+.filtros {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.filtros__busqueda {
+	display: flex;
+	gap: 0.5rem;
+}
+
+.filtros__campo {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+	min-width: 0;
+}
+
+.filtros__campo--texto {
+	flex: 1;
+}
+
+.filtros__etiqueta {
+	color: var(--tinta-suave);
+	font-size: 0.6875rem;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+.filtros input,
+.filtros select {
+	background: var(--papel-alto);
+	border: 1px solid var(--borde);
+	border-radius: var(--radio);
+	padding: 0.55rem 0.7rem;
+	transition: border-color var(--rapido) var(--suave);
+	width: 100%;
+}
+
+.filtros input:focus,
+.filtros select:focus {
+	border-color: var(--acento);
+}
+
+.filtros__boton {
+	align-self: flex-end;
+	background: var(--tinta);
+	border: 1px solid var(--tinta);
+	border-radius: var(--radio);
+	color: var(--papel);
+	cursor: pointer;
+	padding: 0.55rem 1.25rem;
+	transition: background var(--rapido) var(--suave);
+}
+
+.filtros__boton:hover {
+	background: var(--acento);
+	border-color: var(--acento);
+}
+
+.filtros__linea {
+	display: grid;
+	gap: 0.75rem;
+	grid-template-columns: repeat(auto-fit, minmax(min(10rem, 45%), 1fr));
+}
+
+.filtros__resumen {
+	align-items: baseline;
+	border-top: 1px solid var(--borde);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	justify-content: space-between;
+	padding-top: 0.75rem;
+}
+
+.filtros__total {
+	color: var(--tinta-suave);
+	font-size: 0.875rem;
+	margin: 0;
+}
+
+.filtros__limpiar {
+	background: none;
+	border: none;
+	color: var(--acento);
+	cursor: pointer;
+	font-size: 0.875rem;
+	padding: 0;
+	text-decoration: underline;
+	text-underline-offset: 0.18em;
+}
+
+/* ---------------------------------------------------------------- Rejilla */
+
+.catalogo__rejilla {
+	display: grid;
+	gap: clamp(1.25rem, 3vw, 2.5rem) clamp(1rem, 2vw, 1.75rem);
+	grid-template-columns: repeat(auto-fill, minmax(min(8rem, 100%), 1fr));
+}
+
+.tarjeta {
+	display: flex;
+}
+
+.tarjeta__enlace {
+	color: inherit;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	text-decoration: none;
+	width: 100%;
+}
+
+.tarjeta__lamina {
+	background: var(--papel-hondo);
+	overflow: hidden;
+	position: relative;
+	/* Proporción de libro: mantiene la línea de base de la rejilla aunque las
+	   portadas vengan en tamaños distintos de cada fuente. */
+	aspect-ratio: 2 / 3;
+}
+
+.tarjeta__imagen {
+	height: 100%;
+	object-fit: cover;
+	transition: transform 400ms var(--suave);
+	width: 100%;
+}
+
+.tarjeta__enlace:hover .tarjeta__imagen {
+	transform: scale(1.04);
+}
+
+.tarjeta__sin-imagen {
+	align-items: center;
+	background:
+		repeating-linear-gradient(45deg, transparent 0 6px, oklch(0% 0 0 / 0.02) 6px 12px),
+		var(--papel-hondo);
+	border: 1px solid var(--borde);
+	color: var(--tinta-tenue);
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	height: 100%;
+	justify-content: center;
+}
+
+.tarjeta__sin-imagen-marca {
+	border: 1px solid currentColor;
+	font-family: var(--serif);
+	font-size: 1.125rem;
+	padding: 0.3rem 0.6rem;
+}
+
+.tarjeta__sin-imagen-texto {
+	font-size: 0.6875rem;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+.tarjeta__cinta {
+	background: var(--tinta);
+	color: var(--papel);
+	font-size: 0.6875rem;
+	left: 0;
+	letter-spacing: 0.1em;
+	padding: 0.25rem 0.6rem;
+	position: absolute;
+	text-transform: uppercase;
+	top: 0.6rem;
+}
+
+.tarjeta--agotada .tarjeta__lamina {
+	filter: grayscale(0.7);
+	opacity: 0.75;
+}
+
+.tarjeta__cuerpo {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 0.15rem;
+}
+
+.tarjeta__titulo {
+	font-size: 1rem;
+	line-height: 1.2;
+	margin: 0;
+}
+
+.tarjeta__enlace:hover .tarjeta__titulo {
+	color: var(--acento);
+}
+
+.tarjeta__autor {
+	color: var(--tinta-suave);
+	font-size: 0.8125rem;
+	margin: 0;
+}
+
+.tarjeta__pie {
+	align-items: baseline;
+	display: flex;
+	gap: 0.6rem;
+	justify-content: space-between;
+	/* Ancla el precio al pie de la tarjeta: sin esto, un título de dos líneas
+	   desalinea el precio respecto al resto de la fila. */
+	margin: auto 0 0;
+	padding-top: 0.35rem;
+}
+
+.tarjeta__precio {
+	font-variant-numeric: tabular-nums;
+	font-weight: 600;
+}
+
+.tarjeta__condicion {
+	color: var(--tinta-tenue);
+	font-size: 0.6875rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------ Paginación */
+
+.catalogo__paginacion {
+	align-items: center;
+	border-top: 1px solid var(--borde);
+	color: var(--tinta-suave);
+	display: flex;
+	font-size: 0.875rem;
+	gap: 1.5rem;
+	justify-content: center;
+	padding-top: 1.5rem;
+}
+
+.catalogo__paginacion button {
+	background: none;
+	border: 1px solid var(--borde);
+	border-radius: var(--radio);
+	color: var(--tinta);
+	cursor: pointer;
+	padding: 0.45rem 0.9rem;
+	transition: border-color var(--rapido) var(--suave), color var(--rapido) var(--suave);
+}
+
+.catalogo__paginacion button:hover:not(:disabled) {
+	border-color: var(--acento);
+	color: var(--acento);
+}
+
+.catalogo__paginacion button:disabled {
+	cursor: not-allowed;
+	opacity: 0.4;
+}
+
+.catalogo__aviso--error {
+	background: oklch(from var(--acento) l c h / 0.08);
+	border-left: 2px solid var(--acento);
+	color: var(--acento);
+	margin: 0;
+	padding: 0.7rem 0.9rem;
+}
+
+/* ------------------------------------------------------------------ Ficha */
+
+.ficha {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.ficha__migas {
+	margin: 0;
+}
+
+.ficha__migas a {
+	/* `inline-block` con padding vertical: como enlace en línea medía 19 px de
+	   alto, por debajo del mínimo de 24 px que pide WCAG 2.2 para un objetivo
+	   táctil. El margen negativo evita que el relleno mueva la maqueta. */
+	display: inline-block;
+	font-size: 0.875rem;
+	margin: -0.25rem 0;
+	padding: 0.25rem 0;
+}
+
+.ficha__cuerpo {
+	display: grid;
+	gap: clamp(1.5rem, 5vw, 3.5rem);
+	grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+}
+
+@media (max-width: 44rem) {
+	.ficha__cuerpo {
+		grid-template-columns: 1fr;
+	}
+
+	.ficha__lamina {
+		max-width: 15rem;
+	}
+}
+
+.ficha__lamina {
+	background: var(--papel-hondo);
+	/* Sombra larga: la portada se apoya sobre el papel, no se recorta contra él. */
+	box-shadow: 0 1px 2px oklch(0% 0 0 / 0.05), 0 20px 40px -20px oklch(0% 0 0 / 0.25);
+}
+
+.ficha__imagen {
+	width: 100%;
+}
+
+.ficha__sin-imagen {
+	align-items: center;
+	aspect-ratio: 2 / 3;
+	background:
+		repeating-linear-gradient(45deg, transparent 0 6px, oklch(0% 0 0 / 0.02) 6px 12px),
+		var(--papel-hondo);
+	border: 1px solid var(--borde);
+	color: var(--tinta-tenue);
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	justify-content: center;
+}
+
+.ficha__datos {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.ficha__titulo {
+	font-size: clamp(1.75rem, 1.2rem + 2.4vw, 3rem);
+	margin: 0;
+	text-wrap: balance;
+}
+
+.ficha__autor {
+	color: var(--tinta-suave);
+	font-size: 1.125rem;
+	margin: 0 0 0.5rem;
+}
+
+.ficha__estado {
+	align-self: flex-start;
+	border: 1px solid var(--borde);
+	color: var(--tinta-suave);
+	font-size: 0.6875rem;
+	letter-spacing: 0.1em;
+	margin: 0;
+	padding: 0.2rem 0.55rem;
+	text-transform: uppercase;
+}
+
+.ficha__estado--disponible {
+	border-color: var(--verde);
+	color: oklch(38% 0.09 150);
+}
+
+.ficha__estado--reservado {
+	border-color: var(--ambar);
+	color: oklch(40% 0.1 75);
+}
+
+.ficha__precio {
+	font-family: var(--serif);
+	font-size: 2rem;
+	font-variant-numeric: tabular-nums;
+	margin: 0.75rem 0 0;
+}
+
+.ficha__reservar {
+	align-self: flex-start;
+	background: var(--acento);
+	border: 1px solid var(--acento);
+	border-radius: var(--radio);
+	color: var(--papel);
+	margin-top: 0.5rem;
+	padding: 0.7rem 1.5rem;
+	text-decoration: none;
+	transition: background var(--rapido) var(--suave), transform var(--rapido) var(--suave);
+}
+
+.ficha__reservar:hover {
+	background: var(--tinta);
+	border-color: var(--tinta);
+	color: var(--papel);
+}
+
+.ficha__reservar:active {
+	transform: translateY(1px);
+}
+
+.ficha__no-disponible {
+	color: var(--tinta-suave);
+	font-size: 0.9375rem;
+	margin: 0.5rem 0 0;
+	max-width: 40ch;
+}
+
+.ficha__ficha-tecnica {
+	border-top: 1px solid var(--borde);
+	display: grid;
+	gap: 0.5rem 1.5rem;
+	grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+	margin: 1.5rem 0 0;
+	padding-top: 1.25rem;
+}
+
+.ficha__dato dt {
+	color: var(--tinta-tenue);
+	font-size: 0.6875rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.ficha__dato dd {
+	margin: 0.1rem 0 0;
+}
+
+.ficha__sinopsis {
+	border-top: 1px solid var(--borde);
+	margin-top: 1.5rem;
+	padding-top: 1.25rem;
+}
+
+.ficha__sinopsis h2 {
+	font-size: 1rem;
+	margin-bottom: 0.5rem;
+}
+
+.ficha__sinopsis p {
+	color: var(--tinta-suave);
+	margin: 0;
+	max-width: 62ch;
+}
+
+/* -------------------------------------------------- Avísame cuando llegue */
+
+.avisame {
+	background: var(--papel-alto);
+	border: 1px solid var(--borde);
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	margin: 2rem auto 0;
+	max-width: 34rem;
+	padding: clamp(1.25rem, 3vw, 1.75rem);
+	text-align: left;
+}
+
+.avisame__titulo {
+	font-size: 1.125rem;
+	margin: 0;
+}
+
+.avisame__entrada {
+	color: var(--tinta-suave);
+	font-size: 0.875rem;
+	margin: 0;
+}
+
+.avisame__campos {
+	align-items: end;
+	display: grid;
+	gap: 0.75rem;
+	grid-template-columns: repeat(auto-fit, minmax(min(9rem, 100%), 1fr));
+	margin-top: 0.35rem;
+}
+
+.avisame__campo {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+	min-width: 0;
+}
+
+.avisame__etiqueta {
+	font-size: 0.6875rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.avisame__campo input {
+	background: var(--papel);
+	border: 1px solid var(--borde);
+	border-radius: var(--radio);
+	min-width: 0;
+	padding: 0.55rem 0.7rem;
+	transition: border-color var(--rapido) var(--suave);
+	width: 100%;
+}
+
+.avisame__campo input:focus {
+	border-color: var(--acento);
+}
+
+.avisame__boton {
+	background: var(--acento);
+	border: 1px solid var(--acento);
+	border-radius: var(--radio);
+	color: var(--papel);
+	cursor: pointer;
+	padding: 0.55rem 1.1rem;
+	transition: background var(--rapido) var(--suave);
+	white-space: nowrap;
+}
+
+.avisame__boton:hover:not(:disabled) {
+	background: var(--tinta);
+	border-color: var(--tinta);
+}
+
+.avisame__boton:disabled {
+	cursor: not-allowed;
+	opacity: 0.45;
+}
+
+.avisame__error {
+	color: var(--acento);
+	font-size: 0.75rem;
+	margin: 0;
+}
+
+.avisame__hecho {
+	background: oklch(from var(--verde) l c h / 0.1);
+	border-left: 2px solid var(--verde);
+	color: oklch(38% 0.09 150);
+	margin: 2rem auto 0;
+	max-width: 34rem;
+	padding: 0.9rem 1rem;
+	text-align: left;
+}

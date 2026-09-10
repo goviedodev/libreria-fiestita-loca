@@ -1,0 +1,252 @@
+/* Avisos: cada tarjeta es una acción pendiente. Las que ya tienen su libro se
+   marcan al costado para separarlas de las que siguen esperando. */
+
+.ale {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+}
+
+.ale__cargando,
+.ale__vacio {
+	color: var(--tinta-tenue);
+	padding: 3rem 0;
+	text-align: center;
+}
+
+.ale__cabecera {
+	border-bottom: 1px solid var(--borde);
+	padding-bottom: 1rem;
+}
+
+.ale__cabecera h1 {
+	font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem);
+}
+
+.ale__bajada {
+	color: var(--tinta-suave);
+	font-size: 0.9375rem;
+	margin: 0.35rem 0 0;
+	max-width: 52ch;
+}
+
+.ale__subtitulo {
+	color: var(--tinta-suave);
+	font-family: var(--sans);
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	margin: 0.5rem 0 0;
+	text-transform: uppercase;
+}
+
+.ale__pestanas {
+	border-bottom: 1px solid var(--borde);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+}
+
+.ale__pestana {
+	background: none;
+	border: none;
+	border-bottom: 2px solid transparent;
+	color: var(--tinta-suave);
+	cursor: pointer;
+	font-size: 0.875rem;
+	margin-bottom: -1px;
+	padding: 0.5rem 0.75rem;
+	transition: color var(--rapido) var(--suave), border-color var(--rapido) var(--suave);
+}
+
+.ale__pestana:hover {
+	color: var(--tinta);
+}
+
+.ale__pestana--activa {
+	border-bottom-color: var(--acento);
+	color: var(--acento);
+	font-weight: 600;
+}
+
+/* --------------------------------------------------------------- Tarjetas */
+
+.ale__lista {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.ale__tarjeta {
+	background: var(--papel-alto);
+	border: 1px solid var(--borde);
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding: 1rem;
+}
+
+.ale__tarjeta--lista {
+	border-left: 3px solid var(--verde);
+}
+
+.ale__pedido {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem 1rem;
+	justify-content: space-between;
+}
+
+.ale__buscaba {
+	margin: 0;
+}
+
+.ale__buscaba strong {
+	font-family: var(--serif);
+	font-size: 1.0625rem;
+	font-style: italic;
+	font-weight: 600;
+}
+
+.ale__cliente {
+	color: var(--tinta-suave);
+	display: flex;
+	font-size: 0.8125rem;
+	gap: 0.75rem;
+	margin: 0;
+}
+
+.ale__fecha {
+	color: var(--tinta-tenue);
+}
+
+.ale__esperando {
+	color: var(--tinta-tenue);
+	font-size: 0.875rem;
+	margin: 0;
+}
+
+/* ---------------------------------------------------------- Coincidencias */
+
+.ale__coincidencias {
+	border-top: 1px solid var(--borde);
+	display: flex;
+	flex-direction: column;
+	list-style: none;
+	margin: 0;
+	padding: 0.75rem 0 0;
+}
+
+.ale__coincidencia {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.9rem;
+	padding: 0.4rem 0;
+}
+
+.ale__miniatura {
+	flex-shrink: 0;
+	height: 3.25rem;
+	object-fit: cover;
+	width: 2.25rem;
+}
+
+.ale__miniatura--vacia {
+	align-items: center;
+	background: var(--papel-hondo);
+	border: 1px solid var(--borde);
+	color: var(--tinta-tenue);
+	display: flex;
+	font-family: var(--serif);
+	font-size: 0.75rem;
+	justify-content: center;
+}
+
+.ale__coincidencia-datos {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.ale__coincidencia-titulo {
+	color: var(--tinta);
+	font-family: var(--serif);
+	font-size: 1rem;
+	text-decoration: none;
+}
+
+.ale__coincidencia-titulo:hover {
+	color: var(--acento);
+}
+
+.ale__coincidencia-autor {
+	color: var(--tinta-suave);
+	font-size: 0.8125rem;
+}
+
+.ale__ya-no {
+	color: var(--ambar);
+	font-size: 0.75rem;
+}
+
+.ale__whatsapp {
+	background: var(--verde);
+	border-radius: var(--radio);
+	color: var(--papel);
+	flex-shrink: 0;
+	padding: 0.45rem 1rem;
+	text-decoration: none;
+	transition: filter var(--rapido) var(--suave);
+}
+
+.ale__whatsapp:hover {
+	color: var(--papel);
+	filter: brightness(0.92);
+}
+
+/* ---------------------------------------------------------------- Acciones */
+
+.ale__acciones {
+	border-top: 1px solid var(--borde);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	padding-top: 0.5rem;
+}
+
+.ale__texto-boton {
+	background: none;
+	border: none;
+	color: var(--acento);
+	cursor: pointer;
+	font-size: 0.8125rem;
+	padding: 0.2rem;
+	text-decoration: underline;
+	text-underline-offset: 0.18em;
+}
+
+.ale__texto-boton--tenue {
+	color: var(--tinta-tenue);
+}
+
+.ale__texto-boton--tenue:hover {
+	color: var(--tinta-suave);
+}
+
+.ale__aviso {
+	border-left: 2px solid;
+	font-size: 0.9375rem;
+	margin: 0;
+	padding: 0.7rem 0.9rem;
+}
+
+.ale__aviso--error {
+	background: oklch(from var(--acento) l c h / 0.08);
+	border-color: var(--acento);
+	color: var(--acento);
+}

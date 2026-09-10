@@ -1,0 +1,340 @@
+/* Novedades: lista de selección a la izquierda, la pieza real a la derecha. El
+   lienzo se escala con CSS pero sus píxeles son los que se descargan. */
+
+.nov {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+}
+
+.nov__cargando,
+.nov__vacio {
+	color: var(--tinta-tenue);
+	padding: 3rem 0;
+	text-align: center;
+}
+
+.nov__cabecera {
+	border-bottom: 1px solid var(--borde);
+	padding-bottom: 1rem;
+}
+
+.nov__cabecera h1 {
+	font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem);
+}
+
+.nov__bajada {
+	color: var(--tinta-suave);
+	font-size: 0.9375rem;
+	margin: 0.35rem 0 0;
+	max-width: 52ch;
+}
+
+.nov__subtitulo {
+	color: var(--tinta-suave);
+	font-family: var(--sans);
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	margin: 0 0 0.5rem;
+	text-transform: uppercase;
+}
+
+.nov__ayuda {
+	color: var(--tinta-tenue);
+	font-size: 0.8125rem;
+	margin: 0 0 0.75rem;
+}
+
+/* ------------------------------------------------------------------- Rango */
+
+.nov__rango {
+	align-items: end;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}
+
+.nov__campo {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+	min-width: 0;
+}
+
+.nov__etiqueta {
+	font-size: 0.6875rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.nov__campo input {
+	background: var(--papel-alto);
+	border: 1px solid var(--borde);
+	border-radius: var(--radio);
+	min-width: 0;
+	padding: 0.5rem 0.65rem;
+	transition: border-color var(--rapido) var(--suave);
+}
+
+.nov__campo input:focus {
+	border-color: var(--acento);
+}
+
+/* --------------------------------------------------------------- Columnas */
+
+.nov__columnas {
+	display: grid;
+	gap: 1.5rem 2rem;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+}
+
+@media (max-width: 56rem) {
+	.nov__columnas {
+		grid-template-columns: 1fr;
+	}
+}
+
+.nov__seleccion {
+	min-width: 0;
+}
+
+/* --------------------------------------------------------------- Selección */
+
+.nov__lista {
+	display: flex;
+	flex-direction: column;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.nov__item {
+	align-items: center;
+	border-bottom: 1px solid var(--borde);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	padding: 0.6rem 0.4rem;
+	transition: background var(--rapido) var(--suave);
+}
+
+.nov__item--elegido {
+	background: var(--papel-alto);
+	box-shadow: inset 3px 0 0 var(--acento);
+}
+
+.nov__marca {
+	align-items: center;
+	cursor: pointer;
+	display: flex;
+	gap: 0.4rem;
+}
+
+.nov__orden {
+	color: var(--tinta-tenue);
+	font-size: 0.75rem;
+	font-variant-numeric: tabular-nums;
+	min-width: 1.1rem;
+	text-align: center;
+}
+
+.nov__item--elegido .nov__orden {
+	color: var(--acento);
+	font-weight: 600;
+}
+
+.nov__miniatura {
+	flex-shrink: 0;
+	height: 3.25rem;
+	object-fit: cover;
+	width: 2.25rem;
+}
+
+.nov__miniatura--vacia {
+	align-items: center;
+	background: var(--papel-hondo);
+	border: 1px solid var(--borde);
+	color: var(--tinta-tenue);
+	display: flex;
+	font-family: var(--serif);
+	font-size: 0.75rem;
+	justify-content: center;
+}
+
+.nov__datos {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.nov__titulo {
+	font-family: var(--serif);
+	font-size: 1rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.nov__autor {
+	color: var(--tinta-suave);
+	font-size: 0.8125rem;
+}
+
+.nov__precio {
+	font-size: 0.8125rem;
+	font-variant-numeric: tabular-nums;
+	font-weight: 600;
+}
+
+.nov__mover {
+	display: flex;
+	gap: 0.2rem;
+}
+
+.nov__mover button {
+	background: none;
+	border: 1px solid var(--borde);
+	border-radius: var(--radio);
+	color: var(--tinta-suave);
+	cursor: pointer;
+	line-height: 1;
+	padding: 0.3rem 0.45rem;
+	transition: border-color var(--rapido) var(--suave), color var(--rapido) var(--suave);
+}
+
+.nov__mover button:hover:not(:disabled) {
+	border-color: var(--acento);
+	color: var(--acento);
+}
+
+.nov__mover button:disabled {
+	cursor: not-allowed;
+	opacity: 0.35;
+}
+
+/* -------------------------------------------------------- Previsualización */
+
+.nov__previa {
+	min-width: 0;
+}
+
+.nov__marco {
+	background: var(--papel-hondo);
+	border: 1px solid var(--borde);
+	/* La pieza es 1080×1920; el marco reserva su proporción para que no salte al
+	   terminar de dibujarse. */
+	aspect-ratio: 1080 / 1920;
+	overflow: hidden;
+	width: 100%;
+}
+
+.nov__lienzo {
+	display: block;
+	height: 100%;
+	object-fit: contain;
+	width: 100%;
+}
+
+.nov__navegacion {
+	align-items: center;
+	color: var(--tinta-suave);
+	display: flex;
+	font-size: 0.8125rem;
+	gap: 0.75rem;
+	justify-content: space-between;
+	padding-top: 0.75rem;
+}
+
+.nov__navegacion button {
+	background: none;
+	border: 1px solid var(--borde);
+	border-radius: var(--radio);
+	color: var(--tinta);
+	cursor: pointer;
+	padding: 0.35rem 0.7rem;
+}
+
+.nov__navegacion button:disabled {
+	cursor: not-allowed;
+	opacity: 0.4;
+}
+
+/* ------------------------------------------------------------ Publicación */
+
+.nov__publicacion {
+	border-top: 1px solid var(--borde);
+	padding-top: 1.25rem;
+}
+
+.nov__texto {
+	background: var(--papel-alto);
+	border: 1px solid var(--borde);
+	border-radius: var(--radio);
+	font-family: var(--sans);
+	font-size: 0.9375rem;
+	line-height: 1.5;
+	padding: 0.75rem 0.9rem;
+	resize: vertical;
+	width: 100%;
+}
+
+.nov__texto:focus {
+	border-color: var(--acento);
+}
+
+.nov__acciones {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	margin-top: 0.75rem;
+}
+
+/* ----------------------------------------------------------------- Botones */
+
+.nov__primario {
+	background: var(--tinta);
+	border: 1px solid var(--tinta);
+	border-radius: var(--radio);
+	color: var(--papel);
+	cursor: pointer;
+	padding: 0.55rem 1.1rem;
+	transition: background var(--rapido) var(--suave);
+}
+
+.nov__primario:hover:not(:disabled) {
+	background: var(--acento);
+	border-color: var(--acento);
+}
+
+.nov__primario:disabled {
+	cursor: not-allowed;
+	opacity: 0.45;
+}
+
+.nov__texto-boton {
+	background: none;
+	border: none;
+	color: var(--acento);
+	cursor: pointer;
+	font-size: 0.8125rem;
+	padding: 0.3rem 0.2rem;
+	text-decoration: underline;
+	text-underline-offset: 0.18em;
+}
+
+.nov__aviso {
+	border-left: 2px solid;
+	font-size: 0.9375rem;
+	margin: 0.75rem 0 0;
+	padding: 0.7rem 0.9rem;
+}
+
+.nov__aviso--error {
+	background: oklch(from var(--acento) l c h / 0.08);
+	border-color: var(--acento);
+	color: var(--acento);
+}

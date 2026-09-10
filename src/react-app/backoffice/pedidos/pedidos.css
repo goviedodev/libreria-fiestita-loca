@@ -1,0 +1,560 @@
+/* Pedidos: tabla de trabajo. La lectura importante es el estado y el monto, así
+   que el folio va en monoespaciada y los números alineados por dígito. */
+
+.ped {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+}
+
+.ped__cargando,
+.ped__vacio {
+	color: var(--tinta-tenue);
+	padding: 3rem 0;
+	text-align: center;
+}
+
+.ped__cabecera {
+	align-items: flex-end;
+	border-bottom: 1px solid var(--borde);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	justify-content: space-between;
+	padding-bottom: 1rem;
+}
+
+.ped__cabecera h1 {
+	font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem);
+}
+
+.ped__antetitulo {
+	color: var(--tinta-tenue);
+	font-size: 0.6875rem;
+	letter-spacing: 0.14em;
+	margin: 0;
+	text-transform: uppercase;
+}
+
+.ped__folio-titulo {
+	font-family: ui-monospace, "SF Mono", Menlo, monospace;
+	font-size: clamp(1.5rem, 1rem + 2vw, 2.25rem);
+	letter-spacing: 0.04em;
+}
+
+.ped__bajada {
+	color: var(--tinta-suave);
+	font-size: 0.9375rem;
+	margin: 0.35rem 0 0;
+}
+
+.ped__alerta {
+	color: var(--acento);
+}
+
+.ped__subtitulo {
+	border-top: 1px solid var(--borde);
+	font-size: 1rem;
+	margin: 0.75rem 0 0;
+	padding-top: 1.25rem;
+}
+
+.ped__ayuda {
+	color: var(--tinta-tenue);
+	font-size: 0.8125rem;
+}
+
+/* ----------------------------------------------------------------- Filtros */
+
+.ped__filtros {
+	display: flex;
+	gap: 0.6rem;
+}
+
+.ped__filtros input {
+	background: var(--papel-alto);
+	border: 1px solid var(--borde);
+	border-radius: var(--radio);
+	flex: 1;
+	/* Sin esto el input no baja de su ancho intrínseco —`min-width: auto` es el
+	   valor por omisión de un flex item— y empuja al botón fuera de la pantalla en
+	   el teléfono. */
+	min-width: 0;
+	padding: 0.55rem 0.7rem;
+	transition: border-color var(--rapido) var(--suave);
+}
+
+.ped__filtros input:focus {
+	border-color: var(--acento);
+}
+
+.ped__pestanas {
+	border-bottom: 1px solid var(--borde);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+}
+
+.ped__pestana {
+	background: none;
+	border: none;
+	border-bottom: 2px solid transparent;
+	color: var(--tinta-suave);
+	cursor: pointer;
+	font-size: 0.875rem;
+	margin-bottom: -1px;
+	padding: 0.5rem 0.75rem;
+	transition: color var(--rapido) var(--suave), border-color var(--rapido) var(--suave);
+}
+
+.ped__pestana:hover {
+	color: var(--tinta);
+}
+
+.ped__pestana--activa {
+	border-bottom-color: var(--acento);
+	color: var(--acento);
+	font-weight: 600;
+}
+
+/* ----------------------------------------------------------------- Listado */
+
+.ped__lista {
+	display: flex;
+	flex-direction: column;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.ped__fila {
+	border-bottom: 1px solid var(--borde);
+}
+
+.ped__fila--antigua {
+	/* Barra al costado en vez de fondo: marca sin gritar, y sigue legible cuando
+	   hay muchas seguidas. */
+	box-shadow: inset 3px 0 0 var(--acento);
+}
+
+.ped__fila-enlace {
+	align-items: center;
+	color: inherit;
+	display: grid;
+	gap: 0.35rem 1rem;
+	grid-template-columns: 6.5rem minmax(8rem, 1fr) auto auto auto 5.5rem;
+	padding: 0.7rem 0.6rem;
+	text-decoration: none;
+	transition: background var(--rapido) var(--suave);
+}
+
+.ped__fila-enlace:hover {
+	background: var(--papel-hondo);
+	color: inherit;
+}
+
+.ped__folio {
+	font-family: ui-monospace, "SF Mono", Menlo, monospace;
+	font-size: 0.875rem;
+	letter-spacing: 0.03em;
+}
+
+.ped__cliente {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.ped__cliente span {
+	color: var(--tinta-suave);
+	font-size: 0.8125rem;
+}
+
+.ped__meta {
+	display: flex;
+	gap: 0.35rem;
+}
+
+.ped__libros,
+.ped__fecha {
+	color: var(--tinta-suave);
+	font-size: 0.8125rem;
+	white-space: nowrap;
+}
+
+.ped__total {
+	font-variant-numeric: tabular-nums;
+	font-weight: 600;
+	text-align: right;
+	white-space: nowrap;
+}
+
+@media (max-width: 52rem) {
+	.ped__fila-enlace {
+		grid-template-columns: auto 1fr auto;
+	}
+
+	.ped__libros,
+	.ped__fecha {
+		grid-column: 2 / -1;
+	}
+}
+
+/* --------------------------------------------------------------- Pastillas */
+
+.ped__pastilla {
+	border: 1px solid var(--borde);
+	color: var(--tinta-suave);
+	font-size: 0.6875rem;
+	letter-spacing: 0.05em;
+	padding: 0.15rem 0.5rem;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+.ped__pastilla--pendiente {
+	border-color: var(--ambar);
+	color: oklch(40% 0.1 75);
+}
+
+.ped__pastilla--pagado {
+	border-color: var(--verde);
+	color: oklch(38% 0.09 150);
+}
+
+.ped__pastilla--entregado {
+	background: var(--tinta);
+	border-color: var(--tinta);
+	color: var(--papel);
+}
+
+.ped__pastilla--cancelado {
+	color: var(--tinta-tenue);
+	text-decoration: line-through;
+}
+
+.ped__pastilla--alerta {
+	background: var(--acento);
+	border-color: var(--acento);
+	color: var(--papel);
+}
+
+/* ----------------------------------------------------------------- Detalle */
+
+.ped__estado-actual {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}
+
+.ped__acciones {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}
+
+.ped__confirmar {
+	align-items: center;
+	background: var(--papel-hondo);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	padding: 0.5rem 0.75rem;
+}
+
+.ped__confirmar > span:first-child {
+	font-size: 0.875rem;
+}
+
+.ped__columnas {
+	display: grid;
+	gap: 1.5rem 2.5rem;
+	grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+}
+
+.ped__datos {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	margin: 0.75rem 0 0;
+}
+
+.ped__datos dt {
+	color: var(--tinta-tenue);
+	font-size: 0.6875rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.ped__datos dd {
+	margin: 0.1rem 0 0;
+}
+
+.ped__nota {
+	background: var(--papel-hondo);
+	font-size: 0.9375rem;
+	margin: 1rem 0 0;
+	padding: 0.6rem 0.8rem;
+}
+
+.ped__whatsapp {
+	background: var(--verde);
+	border-radius: var(--radio);
+	color: var(--papel);
+	display: inline-block;
+	margin-top: 1rem;
+	padding: 0.55rem 1.1rem;
+	text-decoration: none;
+	transition: filter var(--rapido) var(--suave);
+}
+
+.ped__whatsapp:hover {
+	color: var(--papel);
+	filter: brightness(0.92);
+}
+
+.ped__historial {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+	list-style: none;
+	margin: 0.75rem 0 0;
+	padding: 0;
+}
+
+.ped__historial li {
+	border-left: 2px solid var(--borde);
+	display: flex;
+	gap: 1rem;
+	justify-content: space-between;
+	padding: 0.15rem 0 0.15rem 0.75rem;
+}
+
+.ped__historial-fecha {
+	color: var(--tinta-tenue);
+	font-size: 0.8125rem;
+}
+
+.ped__libros-lista {
+	display: flex;
+	flex-direction: column;
+	list-style: none;
+	margin: 0.75rem 0 0;
+	padding: 0;
+}
+
+.ped__libro {
+	align-items: center;
+	border-bottom: 1px solid var(--borde);
+	display: flex;
+	gap: 0.9rem;
+	padding: 0.6rem 0;
+}
+
+.ped__miniatura {
+	flex-shrink: 0;
+	height: 3.5rem;
+	object-fit: cover;
+	width: 2.5rem;
+}
+
+.ped__miniatura--vacia {
+	align-items: center;
+	background: var(--papel-hondo);
+	border: 1px solid var(--borde);
+	color: var(--tinta-tenue);
+	display: flex;
+	font-family: var(--serif);
+	font-size: 0.75rem;
+	justify-content: center;
+}
+
+.ped__libro-datos {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.ped__libro-titulo {
+	color: var(--tinta);
+	font-family: var(--serif);
+	font-size: 1.0625rem;
+	text-decoration: none;
+}
+
+.ped__libro-titulo:hover {
+	color: var(--acento);
+}
+
+.ped__libro-autor {
+	color: var(--tinta-suave);
+	font-size: 0.8125rem;
+}
+
+.ped__libro-precio {
+	font-variant-numeric: tabular-nums;
+	font-weight: 600;
+}
+
+.ped__total-final {
+	align-items: baseline;
+	display: flex;
+	justify-content: space-between;
+	margin: 0.75rem 0 0;
+}
+
+.ped__total-final span {
+	color: var(--tinta-suave);
+	font-size: 0.75rem;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
+
+.ped__total-final strong {
+	font-family: var(--serif);
+	font-size: 1.75rem;
+	font-variant-numeric: tabular-nums;
+}
+
+/* ----------------------------------------------------------------- Resumen */
+
+.ped__destacado {
+	background: var(--tinta);
+	color: var(--papel);
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.ped__destacado-etiqueta {
+	color: oklch(from var(--papel) l c h / 0.6);
+	font-size: 0.6875rem;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+}
+
+.ped__destacado-valor {
+	font-family: var(--serif);
+	font-size: clamp(2.25rem, 1.5rem + 3vw, 3.5rem);
+	font-variant-numeric: tabular-nums;
+	line-height: 1.05;
+}
+
+.ped__destacado .ped__ayuda {
+	color: oklch(from var(--papel) l c h / 0.55);
+}
+
+.ped__tarjetas {
+	display: grid;
+	gap: 0.75rem;
+	grid-template-columns: repeat(auto-fit, minmax(min(8rem, 45%), 1fr));
+}
+
+.ped__tarjeta {
+	background: var(--papel-alto);
+	border: 1px solid var(--borde);
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+	padding: 1rem;
+}
+
+.ped__tarjeta--acento {
+	border-left: 3px solid var(--acento);
+}
+
+.ped__tarjeta--enlace {
+	color: inherit;
+	text-decoration: none;
+	transition: border-color var(--rapido) var(--suave);
+}
+
+.ped__tarjeta--enlace:hover {
+	border-color: var(--acento);
+	color: inherit;
+}
+
+.ped__tarjeta-valor {
+	font-family: var(--serif);
+	font-size: 2rem;
+	font-variant-numeric: tabular-nums;
+	line-height: 1;
+}
+
+.ped__tarjeta-etiqueta {
+	color: var(--tinta-suave);
+	font-size: 0.75rem;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+/* ----------------------------------------------------------------- Botones */
+
+.ped__primario {
+	background: var(--tinta);
+	border: 1px solid var(--tinta);
+	border-radius: var(--radio);
+	color: var(--papel);
+	cursor: pointer;
+	padding: 0.55rem 1.1rem;
+	transition: background var(--rapido) var(--suave);
+}
+
+.ped__primario:hover:not(:disabled) {
+	background: var(--acento);
+	border-color: var(--acento);
+}
+
+.ped__primario:disabled {
+	cursor: not-allowed;
+	opacity: 0.45;
+}
+
+.ped__peligro {
+	background: none;
+	border: 1px solid var(--acento);
+	border-radius: var(--radio);
+	color: var(--acento);
+	cursor: pointer;
+	padding: 0.55rem 1.1rem;
+	transition: background var(--rapido) var(--suave), color var(--rapido) var(--suave);
+}
+
+.ped__peligro:hover {
+	background: var(--acento);
+	color: var(--papel);
+}
+
+.ped__texto-boton {
+	background: none;
+	border: none;
+	color: var(--acento);
+	cursor: pointer;
+	font-size: 0.875rem;
+	padding: 0.4rem 0.2rem;
+	text-decoration: underline;
+	text-underline-offset: 0.18em;
+}
+
+.ped__aviso {
+	border-left: 2px solid;
+	font-size: 0.9375rem;
+	margin: 0;
+	padding: 0.7rem 0.9rem;
+}
+
+.ped__aviso--error {
+	background: oklch(from var(--acento) l c h / 0.08);
+	border-color: var(--acento);
+	color: var(--acento);
+}
+
+.ped__aviso--info {
+	background: var(--papel-hondo);
+	border-color: var(--tinta-tenue);
+	color: var(--tinta-suave);
+}

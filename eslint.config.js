@@ -5,7 +5,9 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-	{ ignores: ["dist"] },
+	// `coverage` lo genera istanbul y `worker-configuration.d.ts` lo genera
+	// wrangler: son archivos generados, no se editan ni se lintean.
+	{ ignores: ["dist", "coverage", "worker-configuration.d.ts"] },
 	{
 		extends: [js.configs.recommended, ...tseslint.configs.recommended],
 		files: ["**/*.{ts,tsx}"],
