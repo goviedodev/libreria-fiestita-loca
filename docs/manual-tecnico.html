@@ -1,0 +1,1048 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Manual técnico de Librería Fiestita Loca: arquitectura sobre Cloudflare Workers, modelo de datos en D1, superficie de API y las decisiones que no se explican solas.">
+<title>Fiestita Loca · Manual técnico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+
+<style>
+	/* IBM Plex se diseñó para documentación técnica y trae familia monoespaciada
+	   hermana: rutas, endpoints y SQL se sientan en el texto sin desentonar.
+	   El neutro es frío —esto es un documento de ingeniería, no el sitio— y el
+	   rojo del proyecto queda reservado para lo semántico: trampas y peligros. */
+	:root {
+		--fondo: oklch(98.6% 0.003 255);
+		--superficie: oklch(100% 0 0);
+		--fondo-hondo: oklch(95.5% 0.005 255);
+		--tinta: oklch(23% 0.018 255);
+		--tinta-media: oklch(47% 0.016 255);
+		--tinta-tenue: oklch(63% 0.012 255);
+		--borde: oklch(90% 0.008 255);
+		--borde-fuerte: oklch(82% 0.012 255);
+
+		--peligro: oklch(48% 0.17 25);
+		--peligro-fondo: oklch(96% 0.02 25);
+		--aviso: oklch(50% 0.11 70);
+		--aviso-fondo: oklch(96% 0.03 80);
+		--bien: oklch(45% 0.11 155);
+		--bien-fondo: oklch(96% 0.03 155);
+
+		--sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+		--mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme="light"]) {
+			--fondo: oklch(18% 0.014 255);
+			--superficie: oklch(22% 0.016 255);
+			--fondo-hondo: oklch(14.5% 0.012 255);
+			--tinta: oklch(93% 0.006 255);
+			--tinta-media: oklch(73% 0.012 255);
+			--tinta-tenue: oklch(57% 0.012 255);
+			--borde: oklch(31% 0.016 255);
+			--borde-fuerte: oklch(40% 0.018 255);
+
+			--peligro: oklch(72% 0.15 25);
+			--peligro-fondo: oklch(26% 0.05 25);
+			--aviso: oklch(80% 0.12 75);
+			--aviso-fondo: oklch(25% 0.04 80);
+			--bien: oklch(74% 0.13 155);
+			--bien-fondo: oklch(24% 0.04 155);
+		}
+	}
+
+	:root[data-theme="dark"] {
+		--fondo: oklch(18% 0.014 255);
+		--superficie: oklch(22% 0.016 255);
+		--fondo-hondo: oklch(14.5% 0.012 255);
+		--tinta: oklch(93% 0.006 255);
+		--tinta-media: oklch(73% 0.012 255);
+		--tinta-tenue: oklch(57% 0.012 255);
+		--borde: oklch(31% 0.016 255);
+		--borde-fuerte: oklch(40% 0.018 255);
+
+		--peligro: oklch(72% 0.15 25);
+		--peligro-fondo: oklch(26% 0.05 25);
+		--aviso: oklch(80% 0.12 75);
+		--aviso-fondo: oklch(25% 0.04 80);
+		--bien: oklch(74% 0.13 155);
+		--bien-fondo: oklch(24% 0.04 155);
+	}
+
+	html { color-scheme: light dark; -webkit-text-size-adjust: 100%; }
+	* { box-sizing: border-box; }
+	img { max-width: 100%; }
+
+	body {
+		background: var(--fondo);
+		color: var(--tinta);
+		font-family: var(--sans);
+		font-size: 0.9375rem;
+		line-height: 1.6;
+		margin: 0;
+		padding-inline: clamp(1rem, 4vw, 2.5rem);
+		padding-block: 0;
+	}
+
+	.envoltura {
+		display: grid;
+		gap: clamp(2rem, 5vw, 3.5rem);
+		grid-template-columns: 15rem minmax(0, 1fr);
+		margin-inline: auto;
+		max-width: 76rem;
+		padding-block: clamp(2rem, 5vw, 3rem) 5rem;
+	}
+
+	/* -------------------------------------------------------------- Índice */
+
+	.indice { align-self: start; position: sticky; top: 1.5rem; }
+
+	.marca {
+		border-bottom: 2px solid var(--tinta);
+		margin-bottom: 1.25rem;
+		padding-bottom: 0.85rem;
+	}
+
+	.marca__nombre {
+		display: block;
+		font-size: 1.125rem;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+	}
+
+	.marca__rol {
+		color: var(--tinta-tenue);
+		display: block;
+		font-family: var(--mono);
+		font-size: 0.6875rem;
+		letter-spacing: 0.08em;
+		margin-top: 0.2rem;
+		text-transform: uppercase;
+	}
+
+	.indice ol {
+		display: flex;
+		flex-direction: column;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.indice a {
+		border-left: 2px solid var(--borde);
+		color: var(--tinta-media);
+		display: flex;
+		font-size: 0.875rem;
+		gap: 0.55rem;
+		padding: 0.32rem 0 0.32rem 0.7rem;
+		text-decoration: none;
+		transition: color 130ms, border-color 130ms;
+	}
+
+	.indice a:hover { border-left-color: var(--peligro); color: var(--peligro); }
+
+	.indice .num {
+		color: var(--tinta-tenue);
+		font-family: var(--mono);
+		font-size: 0.75rem;
+		font-variant-numeric: tabular-nums;
+	}
+
+	/* ------------------------------------------------------------- Portada */
+
+	.contenido { max-width: 50rem; min-width: 0; }
+
+	.portada { border-bottom: 2px solid var(--tinta); margin-bottom: 2rem; padding-bottom: 1.5rem; }
+
+	h1 {
+		font-size: clamp(1.75rem, 1.3rem + 2vw, 2.75rem);
+		font-weight: 700;
+		letter-spacing: -0.03em;
+		line-height: 1.08;
+		margin: 0;
+		text-wrap: balance;
+	}
+
+	.portada p { color: var(--tinta-media); margin: 0.85rem 0 0; max-width: 62ch; }
+
+	/* ----------------------------------------------------------- Secciones */
+
+	section { scroll-margin-top: 1.5rem; }
+	section + section { margin-top: 3.25rem; }
+
+	.cabeza {
+		align-items: baseline;
+		border-bottom: 1px solid var(--borde-fuerte);
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.6rem 0.85rem;
+		margin-bottom: 1.1rem;
+		padding-bottom: 0.55rem;
+	}
+
+	.cabeza__num {
+		color: var(--tinta-tenue);
+		font-family: var(--mono);
+		font-size: 0.875rem;
+		font-variant-numeric: tabular-nums;
+	}
+
+	h2 {
+		font-size: clamp(1.3rem, 1.1rem + 0.9vw, 1.65rem);
+		font-weight: 700;
+		letter-spacing: -0.02em;
+		margin: 0;
+		margin-right: auto;
+		text-wrap: balance;
+	}
+
+	h3 {
+		font-size: 1.0625rem;
+		font-weight: 600;
+		letter-spacing: -0.01em;
+		margin: 1.9rem 0 0.5rem;
+		text-wrap: balance;
+	}
+
+	h4 {
+		color: var(--tinta-tenue);
+		font-family: var(--mono);
+		font-size: 0.6875rem;
+		font-weight: 500;
+		letter-spacing: 0.08em;
+		margin: 1.5rem 0 0.5rem;
+		text-transform: uppercase;
+	}
+
+	p { margin: 0 0 0.85rem; max-width: 68ch; }
+	p:last-child { margin-bottom: 0; }
+
+	a { color: var(--peligro); text-underline-offset: 0.16em; }
+	:focus-visible { outline: 2px solid var(--peligro); outline-offset: 3px; }
+
+	/* Dónde corre el código de esta sección. Es información: dice qué
+	   restricciones aplican —sin DOM en el worker, sin Node en workerd, sin
+	   transacciones interactivas en D1— no es un adorno de color. */
+	.donde {
+		border: 1px solid currentColor;
+		border-radius: 2px;
+		font-family: var(--mono);
+		font-size: 0.6875rem;
+		font-weight: 500;
+		letter-spacing: 0.04em;
+		padding: 0.08rem 0.4rem;
+		white-space: nowrap;
+	}
+
+	.donde--worker { color: oklch(48% 0.13 265); }
+	.donde--cliente { color: oklch(46% 0.12 320); }
+	.donde--d1 { color: oklch(45% 0.1 200); }
+	.donde--r2 { color: oklch(48% 0.11 145); }
+	.donde--build { color: var(--tinta-tenue); }
+
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme="light"]) .donde--worker { color: oklch(76% 0.12 265); }
+		:root:not([data-theme="light"]) .donde--cliente { color: oklch(76% 0.11 320); }
+		:root:not([data-theme="light"]) .donde--d1 { color: oklch(76% 0.1 200); }
+		:root:not([data-theme="light"]) .donde--r2 { color: oklch(76% 0.11 145); }
+	}
+
+	:root[data-theme="dark"] .donde--worker { color: oklch(76% 0.12 265); }
+	:root[data-theme="dark"] .donde--cliente { color: oklch(76% 0.11 320); }
+	:root[data-theme="dark"] .donde--d1 { color: oklch(76% 0.1 200); }
+	:root[data-theme="dark"] .donde--r2 { color: oklch(76% 0.11 145); }
+
+	code {
+		background: var(--fondo-hondo);
+		border-radius: 2px;
+		font-family: var(--mono);
+		font-size: 0.85em;
+		padding: 0.1em 0.32em;
+	}
+
+	pre {
+		background: var(--fondo-hondo);
+		border: 1px solid var(--borde);
+		border-radius: 3px;
+		font-size: 0.8125rem;
+		line-height: 1.55;
+		margin: 1rem 0;
+		overflow-x: auto;
+		padding: 0.85rem 1rem;
+	}
+
+	pre code { background: none; font-size: inherit; padding: 0; }
+
+	.comentario { color: var(--tinta-tenue); }
+
+	ul.puntos {
+		display: flex;
+		flex-direction: column;
+		gap: 0.45rem;
+		margin: 0.9rem 0;
+		max-width: 68ch;
+		padding-left: 1.15rem;
+	}
+
+	ul.puntos li::marker { color: var(--tinta-tenue); }
+
+	/* --------------------------------------------------------------- Notas */
+
+	.nota {
+		border-left: 3px solid var(--borde-fuerte);
+		font-size: 0.9375rem;
+		margin: 1.1rem 0;
+		max-width: 66ch;
+		padding: 0.6rem 0 0.6rem 0.9rem;
+	}
+
+	.nota--trampa {
+		background: var(--peligro-fondo);
+		border-left-color: var(--peligro);
+		padding: 0.75rem 1rem;
+	}
+
+	.nota--ojo {
+		background: var(--aviso-fondo);
+		border-left-color: var(--aviso);
+		padding: 0.75rem 1rem;
+	}
+
+	.nota--bien {
+		background: var(--bien-fondo);
+		border-left-color: var(--bien);
+		padding: 0.75rem 1rem;
+	}
+
+	.nota__titulo {
+		display: block;
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.06em;
+		margin-bottom: 0.3rem;
+		text-transform: uppercase;
+	}
+
+	.nota--trampa .nota__titulo { color: var(--peligro); }
+	.nota--ojo .nota__titulo { color: var(--aviso); }
+	.nota--bien .nota__titulo { color: var(--bien); }
+
+	/* -------------------------------------------------------------- Tablas */
+
+	.tabla-caja { margin: 1.1rem 0; overflow-x: auto; }
+
+	table {
+		border-collapse: collapse;
+		font-size: 0.875rem;
+		min-width: 34rem;
+		width: 100%;
+	}
+
+	th, td {
+		border-bottom: 1px solid var(--borde);
+		padding: 0.5rem 0.85rem 0.5rem 0;
+		text-align: left;
+		vertical-align: top;
+	}
+
+	th {
+		border-bottom-color: var(--borde-fuerte);
+		color: var(--tinta-tenue);
+		font-family: var(--mono);
+		font-size: 0.6875rem;
+		font-weight: 500;
+		letter-spacing: 0.07em;
+		text-transform: uppercase;
+	}
+
+	td.ruta, th.ruta { font-family: var(--mono); font-size: 0.8125rem; white-space: nowrap; }
+
+	.metodo {
+		font-family: var(--mono);
+		font-size: 0.6875rem;
+		font-weight: 600;
+	}
+
+	.metodo--get { color: oklch(45% 0.1 200); }
+	.metodo--post { color: oklch(46% 0.11 145); }
+	.metodo--patch { color: oklch(50% 0.11 70); }
+	.metodo--delete { color: var(--peligro); }
+
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme="light"]) .metodo--get { color: oklch(76% 0.1 200); }
+		:root:not([data-theme="light"]) .metodo--post { color: oklch(76% 0.11 145); }
+		:root:not([data-theme="light"]) .metodo--patch { color: oklch(80% 0.11 70); }
+	}
+
+	:root[data-theme="dark"] .metodo--get { color: oklch(76% 0.1 200); }
+	:root[data-theme="dark"] .metodo--post { color: oklch(76% 0.11 145); }
+	:root[data-theme="dark"] .metodo--patch { color: oklch(80% 0.11 70); }
+
+	.publico {
+		color: var(--tinta-tenue);
+		font-family: var(--mono);
+		font-size: 0.6875rem;
+	}
+
+	.publico--admin { color: var(--peligro); }
+
+	/* -------------------------------------------------------------- Fichas */
+
+	.ficha {
+		background: var(--superficie);
+		border: 1px solid var(--borde);
+		border-radius: 3px;
+		margin: 1.25rem 0;
+		padding: 1rem 1.15rem;
+	}
+
+	.ficha h4 { margin-top: 0; }
+	.ficha p:last-child, .ficha pre:last-child { margin-bottom: 0; }
+
+	.pie {
+		border-top: 1px solid var(--borde);
+		color: var(--tinta-tenue);
+		font-size: 0.8125rem;
+		margin-top: 3.5rem;
+		padding-top: 1.1rem;
+	}
+
+	@media (max-width: 62rem) {
+		.envoltura { grid-template-columns: 1fr; gap: 2rem; }
+		.indice { position: static; }
+		.indice ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		* { transition-duration: 0.01ms !important; }
+	}
+</style>
+</head>
+<body>
+
+<div class="envoltura">
+	<nav class="indice" aria-label="Índice del manual técnico">
+		<div class="marca">
+			<span class="marca__nombre">Fiestita Loca</span>
+			<span class="marca__rol">Manual técnico</span>
+		</div>
+		<ol>
+			<li><a href="#panorama"><span class="num">01</span> Panorama</a></li>
+			<li><a href="#estructura"><span class="num">02</span> Estructura</a></li>
+			<li><a href="#datos"><span class="num">03</span> Modelo de datos</a></li>
+			<li><a href="#api"><span class="num">04</span> Superficie de API</a></li>
+			<li><a href="#decisiones"><span class="num">05</span> Decisiones</a></li>
+			<li><a href="#trampas"><span class="num">06</span> Trampas</a></li>
+			<li><a href="#pruebas"><span class="num">07</span> Pruebas</a></li>
+			<li><a href="#despliegue"><span class="num">08</span> Despliegue</a></li>
+			<li><a href="#presupuestos"><span class="num">09</span> Presupuestos</a></li>
+		</ol>
+	</nav>
+
+	<main class="contenido">
+		<header class="portada">
+			<h1>Manual técnico</h1>
+			<p>
+				Cómo está armado el sistema y por qué. Las secciones llevan una etiqueta de
+				<strong>dónde corre</strong> lo que describen —<span class="donde donde--worker">worker</span>
+				<span class="donde donde--cliente">cliente</span>
+				<span class="donde donde--d1">d1</span>
+				<span class="donde donde--r2">r2</span>— porque cada runtime trae sus propias
+				restricciones y la mitad de las trampas de este proyecto salen de confundirlas.
+			</p>
+		</header>
+
+		<!-- =============================================== 01 PANORAMA -->
+
+		<section id="panorama">
+			<div class="cabeza">
+				<span class="cabeza__num">01</span>
+				<h2>Panorama</h2>
+				<span class="donde donde--worker">worker</span>
+			</div>
+
+			<p>
+				<strong>Un solo Worker sirve la SPA y la API.</strong> No hay Pages ni backend aparte, así
+				que tampoco hay CORS ni dos despliegues que sincronizar. El
+				<code>@cloudflare/vite-plugin</code> corre exactamente el mismo Worker en desarrollo, de
+				modo que <code>npm run dev</code> y producción se comportan igual.
+			</p>
+
+			<h4>Recorrido de una petición</h4>
+			<pre><code>GET /api/libros?q=borges
+  └─ Hono → rutas/catalogo.ts → datos/libros.ts → D1
+
+GET /api/imagenes/&lt;hash&gt;.jpg
+  └─ Hono → rutas/imagenes.ts → R2  (Cache-Control inmutable)
+
+GET /libro/abc-123
+  └─ no coincide con un asset ni con /api/
+     └─ app.notFound → servirSpa()
+        ├─ pide index.html a ASSETS
+        └─ si la ruta es una ficha, le inyecta las etiquetas Open Graph</code></pre>
+
+			<div class="nota nota--trampa">
+				<span class="nota__titulo">Trampa</span>
+				Con un Worker montado, <code>assets.not_found_handling</code> <strong>no</strong> aplica el
+				fallback de SPA por su cuenta: todo lo que no es un archivo estático llega al Worker, y Hono
+				responde 404 antes de que el enrutador de assets intervenga. Por eso <code>servirSpa()</code>
+				existe. Sin él, cada enlace profundo daría 404 — y solo se nota abriendo una URL directa, no
+				navegando desde la portada.
+			</div>
+
+			<h4>Stack</h4>
+			<div class="tabla-caja">
+				<table>
+					<thead><tr><th>Capa</th><th>Qué</th><th>Nota</th></tr></thead>
+					<tbody>
+						<tr><td>UI</td><td>React 19.2 + TypeScript 5.9</td><td>modo <code>strict</code></td></tr>
+						<tr><td>Enrutado cliente</td><td>wouter</td><td>ligero, sin data-router</td></tr>
+						<tr><td>Build</td><td>Vite 7</td><td><code>@cloudflare/vite-plugin</code></td></tr>
+						<tr><td>API</td><td>Hono 4.11</td><td>dentro del Worker</td></tr>
+						<tr><td>Validación</td><td>Zod</td><td>solo en el Worker, ver §05</td></tr>
+						<tr><td>Datos</td><td>D1 (SQLite)</td><td>sin transacciones interactivas</td></tr>
+						<tr><td>Binarios</td><td>R2</td><td>portadas y fotos</td></tr>
+						<tr><td>Pruebas</td><td>Vitest 4</td><td>dos proyectos, ver §07</td></tr>
+					</tbody>
+				</table>
+			</div>
+		</section>
+
+		<!-- ============================================= 02 ESTRUCTURA -->
+
+		<section id="estructura">
+			<div class="cabeza">
+				<span class="cabeza__num">02</span>
+				<h2>Estructura del código</h2>
+			</div>
+
+			<pre><code>src/
+├── shared/            <span class="comentario">tipos y validación compartidos</span>
+│   ├── libro.ts       <span class="comentario">tipos y constantes puras — sin Zod</span>
+│   ├── libro-esquemas.ts  <span class="comentario">esquemas Zod — solo los importa el worker</span>
+│   ├── telefono.ts    <span class="comentario">celular chileno: valida, normaliza, enmascara</span>
+│   ├── isbn.ts        <span class="comentario">dígito verificador ISBN-10/13</span>
+│   ├── texto.ts       <span class="comentario">normalizarTexto() y formatearPrecio()</span>
+│   └── whatsapp.ts    <span class="comentario">armado de mensajes y enlaces wa.me</span>
+├── worker/
+│   ├── index.ts       <span class="comentario">composición del router y servirSpa()</span>
+│   ├── rutas/         <span class="comentario">un archivo por área de la API</span>
+│   ├── datos/         <span class="comentario">acceso a D1, una función por operación</span>
+│   ├── servicios/     <span class="comentario">isbn, fotos, folio, sesion, previsualizacion</span>
+│   └── middleware/    <span class="comentario">sesion.ts y errores.ts</span>
+└── react-app/
+    ├── catalogo/      <span class="comentario">listado, filtros, ficha</span>
+    ├── reserva/       <span class="comentario">selección, formulario, consulta por folio</span>
+    ├── backoffice/    <span class="comentario">cargado con lazy() — chunk aparte</span>
+    ├── lib/           <span class="comentario">api.ts y Recurso.tsx</span>
+    └── ui/            <span class="comentario">cascarón de las vistas públicas</span></code></pre>
+
+			<p>
+				La regla que ordena todo: <strong>las rutas traducen HTTP, los datos hablan con D1, los
+				servicios hacen el trabajo que no es ni una cosa ni la otra.</strong> Una ruta que arma SQL
+				o una función de datos que lee cabeceras están en el archivo equivocado.
+			</p>
+
+			<h3>Qué vive en <code>shared/</code></h3>
+			<p>
+				Los tipos los importan ambos lados, así que un cambio de contrato rompe la compilación en
+				vez de romper en producción. La separación entre <code>x.ts</code> y
+				<code>x-esquemas.ts</code> no es estética — ver §05.
+			</p>
+		</section>
+
+		<!-- ================================================== 03 DATOS -->
+
+		<section id="datos">
+			<div class="cabeza">
+				<span class="cabeza__num">03</span>
+				<h2>Modelo de datos</h2>
+				<span class="donde donde--d1">d1</span>
+			</div>
+
+			<p>Siete tablas. Las migraciones viven en <code>migrations/</code> y se aplican por nombre.</p>
+
+			<div class="tabla-caja">
+				<table>
+					<thead><tr><th>Tabla</th><th>Rol</th></tr></thead>
+					<tbody>
+						<tr><td class="ruta">libros</td><td>el ejemplar: datos bibliográficos, condición, precio, estado, claves de imagen, columnas <code>_norm</code></td></tr>
+						<tr><td class="ruta">reservas</td><td>folio, cliente, estado, total</td></tr>
+						<tr><td class="ruta">reserva_items</td><td>libro ↔ reserva, con el <strong>precio congelado</strong></td></tr>
+						<tr><td class="ruta">reserva_eventos</td><td>historial de transiciones con su fecha</td></tr>
+						<tr><td class="ruta">solicitudes</td><td>lo que alguien buscó y no estaba</td></tr>
+						<tr><td class="ruta">solicitud_coincidencias</td><td>solicitud ↔ libro, N a N</td></tr>
+						<tr><td class="ruta">intentos_ingreso</td><td>ventana de rate limiting del backoffice</td></tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3>Tres columnas que parecen raras y no lo son</h3>
+
+			<h4>libros.estado</h4>
+			<p>
+				Denormalizada a propósito. El catálogo es la ruta más leída del sistema; derivar el estado
+				de las reservas activas pagaría un <code>JOIN</code> en cada consulta. La atomicidad del
+				<code>batch()</code> garantiza que la columna no se desincronice.
+			</p>
+
+			<h4>titulo_norm / autor_norm</h4>
+			<p>
+				SQLite en D1 no trae <code>unaccent</code> ni collation insensible a diacríticos, y
+				<code>COLLATE NOCASE</code> solo cubre ASCII. Se guardan copias sin tildes y en minúsculas,
+				calculadas con <code>normalizarTexto()</code>, indexadas.
+			</p>
+			<div class="nota nota--ojo">
+				<span class="nota__titulo">Ojo</span>
+				<code>\p{Diacritic}</code> sobre NFD también le quita la virgulilla a la <strong>ñ</strong>:
+				<code>años</code> se normaliza a <code>anos</code>. Es lo correcto para buscar —el término
+				del visitante pasa por la misma función— pero significa que estas columnas
+				<strong>nunca</strong> sirven para mostrar. El título que se muestra sale siempre de
+				<code>titulo</code>.
+			</div>
+			<p>
+				Al editar un campo hay que recalcular su columna normalizada <strong>en el mismo</strong>
+				<code>UPDATE</code>. Es el error fácil de cometer.
+			</p>
+
+			<h4>reserva_items.precio</h4>
+			<p>
+				El precio del momento de reservar, no el actual del libro. Si el dueño sube el precio
+				después, el histórico de la reserva no se altera y el cliente paga lo que aceptó.
+			</p>
+
+			<h3>Precios y fechas</h3>
+			<ul class="puntos">
+				<li><strong>Precio:</strong> <code>INTEGER</code> de pesos. El peso chileno no tiene decimales; nunca <code>REAL</code> ni cadena. El formateo a <code>$12.990</code> ocurre solo en la presentación.</li>
+				<li><strong>Fechas:</strong> ISO 8601 UTC en <code>TEXT</code>, ordenables lexicográficamente.</li>
+			</ul>
+		</section>
+
+		<!-- ==================================================== 04 API -->
+
+		<section id="api">
+			<div class="cabeza">
+				<span class="cabeza__num">04</span>
+				<h2>Superficie de API</h2>
+				<span class="donde donde--worker">worker</span>
+			</div>
+
+			<p>
+				Todo bajo <code>/api/</code>. Lo que cuelga de <code>/api/admin</code> pasa por
+				<code>requiereSesion</code> <em>sin excepciones</em>: el middleware se monta en el prefijo
+				completo, no ruta por ruta.
+			</p>
+
+			<div class="tabla-caja">
+				<table>
+					<thead><tr><th>Método</th><th class="ruta">Ruta</th><th>Qué hace</th><th>Acceso</th></tr></thead>
+					<tbody>
+						<tr><td><span class="metodo metodo--get">GET</span></td><td class="ruta">/api/salud</td><td>ping</td><td><span class="publico">público</span></td></tr>
+						<tr><td><span class="metodo metodo--get">GET</span></td><td class="ruta">/api/libros</td><td>catálogo con búsqueda, filtros, orden y paginación</td><td><span class="publico">público</span></td></tr>
+						<tr><td><span class="metodo metodo--get">GET</span></td><td class="ruta">/api/libros/:id</td><td>ficha; 404 si no existe o está dado de baja</td><td><span class="publico">público</span></td></tr>
+						<tr><td><span class="metodo metodo--get">GET</span></td><td class="ruta">/api/imagenes/:clave</td><td>sirve de R2, caché inmutable</td><td><span class="publico">público</span></td></tr>
+						<tr><td><span class="metodo metodo--post">POST</span></td><td class="ruta">/api/reservas</td><td>crea reserva, bloquea libros, devuelve enlace de WhatsApp</td><td><span class="publico">público</span></td></tr>
+						<tr><td><span class="metodo metodo--get">GET</span></td><td class="ruta">/api/reservas/:folio</td><td>consulta pública; teléfono enmascarado</td><td><span class="publico">público</span></td></tr>
+						<tr><td><span class="metodo metodo--post">POST</span></td><td class="ruta">/api/solicitudes</td><td>registra una búsqueda sin resultados, deduplica</td><td><span class="publico">público</span></td></tr>
+						<tr><td><span class="metodo metodo--post">POST</span></td><td class="ruta">/api/auth/ingreso</td><td>token → cookie; rate limited</td><td><span class="publico">público</span></td></tr>
+						<tr><td><span class="metodo metodo--post">POST</span></td><td class="ruta">/api/auth/salida</td><td>vence la cookie</td><td><span class="publico">público</span></td></tr>
+						<tr><td><span class="metodo metodo--get">GET</span></td><td class="ruta">/api/auth/sesion</td><td>¿hay sesión?</td><td><span class="publico">público</span></td></tr>
+						<tr><td><span class="metodo metodo--get">GET</span></td><td class="ruta">/api/admin/libros</td><td>inventario, incluye dados de baja</td><td><span class="publico publico--admin">sesión</span></td></tr>
+						<tr><td><span class="metodo metodo--get">GET</span></td><td class="ruta">/api/admin/libros/isbn/:isbn</td><td>metadatos por ISBN + cuántos ejemplares hay</td><td><span class="publico publico--admin">sesión</span></td></tr>
+						<tr><td><span class="metodo metodo--post">POST</span></td><td class="ruta">/api/admin/libros</td><td>alta; dispara la detección de coincidencias</td><td><span class="publico publico--admin">sesión</span></td></tr>
+						<tr><td><span class="metodo metodo--patch">PATCH</span></td><td class="ruta">/api/admin/libros/:id</td><td>edición parcial</td><td><span class="publico publico--admin">sesión</span></td></tr>
+						<tr><td><span class="metodo metodo--delete">DELETE</span></td><td class="ruta">/api/admin/libros/:id</td><td>baja lógica; 409 si hay reserva activa</td><td><span class="publico publico--admin">sesión</span></td></tr>
+						<tr><td><span class="metodo metodo--post">POST</span></td><td class="ruta">/api/admin/libros/:id/foto</td><td>multipart; valida por bytes</td><td><span class="publico publico--admin">sesión</span></td></tr>
+						<tr><td><span class="metodo metodo--get">GET</span></td><td class="ruta">/api/admin/reservas</td><td>pedidos con filtro, búsqueda y marca de +7 días</td><td><span class="publico publico--admin">sesión</span></td></tr>
+						<tr><td><span class="metodo metodo--get">GET</span></td><td class="ruta">/api/admin/reservas/:folio</td><td>detalle + enlace de contacto</td><td><span class="publico publico--admin">sesión</span></td></tr>
+						<tr><td><span class="metodo metodo--post">POST</span></td><td class="ruta">/api/admin/reservas/:folio/estado</td><td>transición; ajusta el stock</td><td><span class="publico publico--admin">sesión</span></td></tr>
+						<tr><td><span class="metodo metodo--get">GET</span></td><td class="ruta">/api/admin/resumen</td><td>totales del negocio</td><td><span class="publico publico--admin">sesión</span></td></tr>
+						<tr><td><span class="metodo metodo--get">GET</span></td><td class="ruta">/api/admin/alertas</td><td>avisos con enlace de WhatsApp armado</td><td><span class="publico publico--admin">sesión</span></td></tr>
+						<tr><td><span class="metodo metodo--post">POST</span></td><td class="ruta">/api/admin/alertas/:id/estado</td><td>avisada / cerrada</td><td><span class="publico publico--admin">sesión</span></td></tr>
+						<tr><td><span class="metodo metodo--get">GET</span></td><td class="ruta">/api/admin/novedades</td><td>libros por rango de fechas</td><td><span class="publico publico--admin">sesión</span></td></tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3>Formato de error</h3>
+			<p>
+				Todo fallo pasa por <code>manejarErrores</code> y sale con la misma envoltura. Los errores de
+				Zod se traducen a un mapa campo → mensaje que el formulario del cliente pinta directamente.
+			</p>
+			<pre><code>{ "error": "Revisa los datos ingresados",
+  "campos": { "precio": "El precio debe ser mayor que cero" } }</code></pre>
+			<p>
+				Un error inesperado sale con un mensaje genérico y el detalle va al log del servidor, nunca
+				al cliente.
+			</p>
+		</section>
+
+		<!-- ============================================= 05 DECISIONES -->
+
+		<section id="decisiones">
+			<div class="cabeza">
+				<span class="cabeza__num">05</span>
+				<h2>Decisiones que hay que entender</h2>
+			</div>
+
+			<p>Las que parecen equivocadas hasta que se explican.</p>
+
+			<h3>Atomicidad sin transacciones <span class="donde donde--d1">d1</span></h3>
+			<p>
+				D1 no tiene <code>BEGIN</code>/<code>COMMIT</code> interactivo, solo
+				<code>db.batch()</code>, que sí es atómico. Pero <code>batch()</code> <strong>no</strong>
+				aborta porque un <code>UPDATE</code> condicional afecte cero filas: hace falta que alguna
+				sentencia <em>lance</em>.
+			</p>
+			<p>
+				La solución encadena por clave foránea —que D1 sí aplica, a diferencia de SQLite por
+				omisión. El <code>INSERT</code> de la reserva solo produce fila si todos los libros siguen
+				disponibles; el <code>INSERT</code> de los items la referencia, así que si no se creó, viola
+				la FK y tumba el batch entero:
+			</p>
+			<pre><code>INSERT INTO reservas (...) SELECT ?, ...
+  WHERE (SELECT COUNT(*) FROM libros
+         WHERE id IN (...) AND estado = 'disponible') = ?;
+
+INSERT INTO reserva_items (reserva_id, ...)
+  SELECT ?, id, precio FROM libros WHERE id IN (...);</code></pre>
+			<p>
+				Sin compensaciones a mano y sin ventana de inconsistencia. Ver
+				<code>datos/reservas.ts</code> y su prueba de conflicto concurrente.
+			</p>
+
+			<h3>Las portadas externas se descargan a R2 <span class="donde donde--r2">r2</span></h3>
+			<p>
+				Al crear un libro, si la fuente bibliográfica devolvió una URL de portada, el Worker
+				<strong>descarga esa imagen y la guarda en R2</strong> en vez de guardar la URL. Resuelve
+				tres cosas:
+			</p>
+			<ul class="puntos">
+				<li>La portada no desaparece si la fuente la borra.</li>
+				<li>No se hace <em>hotlinking</em> a un tercero.</li>
+				<li>
+					<strong>Habilita las piezas de Instagram.</strong> <code>canvas.toBlob()</code> lanza
+					<code>SecurityError</code> sobre un canvas contaminado por una imagen de otro origen.
+					Sirviendo todo desde el propio dominio, el problema no existe.
+				</li>
+			</ul>
+			<div class="nota nota--bien">
+				<span class="nota__titulo">Por qué importa recordarlo</span>
+				La tercera razón es la que se olvida, y es la que rompería una capacidad entera cuatro
+				grupos de trabajo más tarde. Si alguna vez se plantea "guardemos la URL y listo", esto es lo
+				que se pierde.
+			</div>
+
+			<h3>Claves de imagen con hash de contenido <span class="donde donde--r2">r2</span></h3>
+			<p>
+				La clave en R2 es <code>sha256(bytes)</code> + extensión. Eso da URLs inmutables —de ahí el
+				<code>Cache-Control: max-age=31536000, immutable</code>— pero también significa que dos
+				libros con la misma imagen <strong>comparten el objeto</strong>. Al reemplazar una foto no
+				se puede borrar la anterior sin comprobar que nadie más la referencia:
+				<code>eliminarImagenSiHuerfana()</code>.
+			</p>
+
+			<h3>Validación de imagen por bytes, no por cabecera <span class="donde donde--worker">worker</span></h3>
+			<p>
+				El <code>Content-Type</code> de un multipart lo pone quien sube el archivo.
+				<code>tipoPorContenido()</code> mira la firma real: <code>FF D8 FF</code> para JPEG, los 8
+				bytes de PNG, <code>RIFF</code>…<code>WEBP</code> para WebP.
+			</p>
+
+			<h3>Sesión sin tabla <span class="donde donde--worker">worker</span></h3>
+			<p>
+				La cookie es <code>expiracion.firma</code>, con HMAC-SHA256 sobre un secreto del Worker.
+				Verificar es comprobar firma y expiración: cero lecturas a D1 por petición. La comparación
+				del token de ingreso se hace en tiempo constante, sobre los <em>digest</em> SHA-256 de ambos
+				valores, no con <code>===</code> sobre las cadenas.
+			</p>
+			<p>
+				No hay revocación individual porque no hay usuarios: revocar es rotar
+				<code>SESSION_SECRET</code>, que invalida todo al instante.
+			</p>
+
+			<h3>Zod separado de los tipos <span class="donde donde--build">build</span></h3>
+			<div class="nota nota--trampa">
+				<span class="nota__titulo">Trampa</span>
+				Importar una <strong>constante</strong> desde un módulo que trae Zod arrastra la librería
+				entera al bundle del visitante. Una línea tan inocente como
+				<code>import { CONDICIONES } from "shared/libro"</code> costó <strong>23 KB gzip</strong>.
+				Los <em>tipos</em> se borran al compilar y son gratis; las constantes no.
+			</div>
+			<p>
+				Por eso <code>libro.ts</code> tiene tipos y constantes puras, y
+				<code>libro-esquemas.ts</code> los esquemas. El worker importa ambos; el cliente solo el
+				primero. Mismo corte en <code>reserva</code> y <code>solicitud</code>.
+			</p>
+
+			<h3>Carga de datos en el cliente <span class="donde donde--cliente">cliente</span></h3>
+			<div class="nota nota--trampa">
+				<span class="nota__titulo">Trampa</span>
+				Crear la promesa en el <strong>mismo</strong> componente que la consume con
+				<code>use()</code> es un bucle infinito. Al suspender, React descarta el render a medio
+				hacer y su estado; en el reintento el inicializador de <code>useState</code> crea otra
+				promesa y suspende otra vez. Se ve como una petición por fotograma y una pantalla clavada en
+				«Cargando…».
+			</div>
+			<p>
+				<code>lib/Recurso.tsx</code> encapsula la forma correcta: la promesa se crea en un
+				componente que no suspende, y se consume en un hijo que sí, dentro del
+				<code>&lt;Suspense&gt;</code> que ese componente monta.
+			</p>
+			<pre><code>&lt;Recurso pedir={() =&gt; obtener("/api/libros")} respaldo={&lt;p&gt;Cargando…&lt;/p&gt;}&gt;
+  {(datos) =&gt; &lt;Listado inicial={datos} /&gt;}
+&lt;/Recurso&gt;</code></pre>
+		</section>
+
+		<!-- =============================================== 06 TRAMPAS -->
+
+		<section id="trampas">
+			<div class="cabeza">
+				<span class="cabeza__num">06</span>
+				<h2>Trampas</h2>
+			</div>
+
+			<p>
+				Cosas que costaron tiempo y que el comportamiento real contradice lo que uno esperaría.
+				<code>LEARNINGS.md</code> las tiene todas con su contexto; acá van las que más se repiten.
+			</p>
+
+			<h3>React 19 <span class="donde donde--cliente">cliente</span></h3>
+			<ul class="puntos">
+				<li>
+					<strong><code>setState</code> síncrono dentro de un efecto es <em>error</em> de lint</strong>,
+					no aviso: rompe el gate. Los efectos quedan para sincronizar con sistemas externos.
+					Llamar <code>setState</code> desde un callback asíncrono del efecto sí está permitido.
+				</li>
+				<li>
+					<strong>Una función inline en las dependencias de un efecto lo recrea en cada render.</strong>
+					El escáner de códigos releía el mismo código sin parar —104 mutaciones de DOM por segundo—
+					porque dependía de un <code>alDetectar</code> que el padre pasaba como arrow. Se guarda el
+					callback en una ref sincronizada por un efecto sin dependencias.
+				</li>
+				<li>
+					<strong>El estado que sobrevive a una acción vive por encima de lo que la acción destruye.</strong>
+					La confirmación de reserva estaba dentro del formulario, y <code>vaciar()</code> —que la
+					propia confirmación disparaba— desmontaba el formulario con el folio adentro.
+				</li>
+			</ul>
+
+			<h3>Herramientas de prueba <span class="donde donde--build">build</span></h3>
+			<ul class="puntos">
+				<li>
+					<strong><code>@vitest/coverage-v8</code> no funciona en workerd:</strong> necesita
+					<code>node:inspector/promises</code>, que no existe ahí. Se usa
+					<code>coverage-istanbul</code>, que instrumenta al transformar.
+				</li>
+				<li>
+					<strong>La instrumentación de istanbul hace lento el primer <code>import()</code>
+					dinámico.</strong> Una prueba con <code>vi.resetModules()</code> puede pasar de 200 ms a
+					más de 5 s y agotar el timeout <em>solo al medir cobertura</em>.
+				</li>
+				<li>
+					<strong><code>@cloudflare/vitest-pool-workers</code> 0.22 cambió la API:</strong>
+					<code>defineWorkersConfig</code> desde <code>/config</code> ya no existe. Ahora es un
+					plugin de Vite llamado <code>cloudflareTest</code>, exportado desde la raíz.
+				</li>
+				<li>
+					<strong>Los bindings de Miniflare ganan sobre <code>.dev.vars</code></strong> en las
+					pruebas, aunque salga el mensaje de que <code>.dev.vars</code> se cargó.
+				</li>
+				<li>
+					<strong>La Cache API persiste entre pruebas del mismo archivo.</strong> Vive en el
+					isolate, no en el caso; <code>vi.restoreAllMocks()</code> no la toca.
+				</li>
+			</ul>
+
+			<h3>CSS y maqueta <span class="donde donde--cliente">cliente</span></h3>
+			<ul class="puntos">
+				<li>
+					<strong><code>min-width: auto</code> es el valor por omisión de un flex item.</strong>
+					<code>flex: 1</code> fija <code>flex-basis: 0</code> pero no toca <code>min-width</code>,
+					así que el item no se encoge y empuja a su hermano fuera de la pantalla. Para encontrar al
+					culpable sin adivinar, preguntarle al DOM quién se pasa del ancho.
+				</li>
+				<li>
+					<strong>Un <code>&lt;br&gt;</code> oculto por CSS pega las palabras que separaba:</strong>
+					JSX descarta el salto de línea que lo rodea. Los títulos se quiebran con
+					<code>text-wrap: balance</code> y un <code>max-width</code> en <code>ch</code>.
+				</li>
+			</ul>
+
+			<div class="nota nota--ojo">
+				<span class="nota__titulo">La trampa de fondo</span>
+				Varias de estas no las detecta la suite. El bucle de suspensión, la relectura del escáner y
+				la confirmación de reserva perdida pasaban con <code>tsc</code>, <code>eslint</code> y todas
+				las pruebas del Worker en verde. <strong>Una pantalla no está verificada hasta abrirla en un
+				navegador y recorrer el flujo hasta la última vista.</strong>
+			</div>
+		</section>
+
+		<!-- =============================================== 07 PRUEBAS -->
+
+		<section id="pruebas">
+			<div class="cabeza">
+				<span class="cabeza__num">07</span>
+				<h2>Pruebas</h2>
+				<span class="donde donde--build">build</span>
+			</div>
+
+			<p>Dos proyectos, porque el código corre en dos runtimes distintos.</p>
+
+			<div class="tabla-caja">
+				<table>
+					<thead><tr><th>Proyecto</th><th>Dónde</th><th>Archivos</th><th>Para qué</th></tr></thead>
+					<tbody>
+						<tr>
+							<td class="ruta">worker</td>
+							<td>workerd + D1 efímera</td>
+							<td class="ruta">test/*.test.ts</td>
+							<td>rutas, datos, servicios; migraciones reales</td>
+						</tr>
+						<tr>
+							<td class="ruta">cliente</td>
+							<td>happy-dom</td>
+							<td class="ruta">test/cliente/*.test.ts</td>
+							<td>almacenamiento, portapapeles, maquetación</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<p>
+				Las migraciones se leen en Node y viajan como binding de prueba, así que cada worker de test
+				las aplica sobre su propia base. Una migración nueva se ejercita sola en la suite.
+			</p>
+
+			<h4>Qué se excluye de la cobertura, y por qué</h4>
+			<ul class="puntos">
+				<li>Los componentes <code>.tsx</code>: se verifican en el navegador contra el Worker local.</li>
+				<li>Los <code>api.ts</code> del cliente: envoltorios de una línea sobre <code>fetch</code>; probarlos verificaría el simulacro.</li>
+			</ul>
+			<p>
+				Lo que <strong>no</strong> se excluye es la lógica de verdad. Cuando algo interesante está
+				enterrado en código no probable, se extrae: <code>maquetacion.ts</code> salió de
+				<code>pieza.ts</code> justo por eso, y ahí apareció un cuerpo de fuente que se pasaba por
+				debajo de su propio mínimo.
+			</p>
+
+			<pre><code>npm test              <span class="comentario"># los dos proyectos</span>
+npx vitest run --project cliente
+npm run test:cov      <span class="comentario"># umbral 80% en las cuatro métricas</span></code></pre>
+		</section>
+
+		<!-- ============================================ 08 DESPLIEGUE -->
+
+		<section id="despliegue">
+			<div class="cabeza">
+				<span class="cabeza__num">08</span>
+				<h2>Desarrollo y despliegue</h2>
+			</div>
+
+			<h4>Levantar</h4>
+			<pre><code>npm install
+cp .dev.vars.example .dev.vars   <span class="comentario"># y edítalo</span>
+./run.sh                          <span class="comentario"># instala, migra y levanta</span></code></pre>
+
+			<h4>Bindings</h4>
+			<div class="tabla-caja">
+				<table>
+					<thead><tr><th>Binding</th><th>Recurso</th></tr></thead>
+					<tbody>
+						<tr><td class="ruta">DB</td><td>D1 <code>libreria-fiestita-loca</code></td></tr>
+						<tr><td class="ruta">IMAGENES</td><td>R2 <code>fiestita-loca-imagenes</code></td></tr>
+						<tr><td class="ruta">ASSETS</td><td>el SPA compilado</td></tr>
+					</tbody>
+				</table>
+			</div>
+			<p>
+				Si agregas un binding: edita <code>wrangler.json</code> y corre
+				<code>npm run cf-typegen</code>. <code>worker-configuration.d.ts</code> es generado — no se
+				edita ni se lintea.
+			</p>
+
+			<div class="nota nota--ojo">
+				<span class="nota__titulo">Ojo</span>
+				<code>d1 create</code> y <code>r2 bucket create</code> ofrecen agregar el binding por ti,
+				pero sin TTY toman la respuesta por omisión: <strong>no</strong>. El recurso queda creado y
+				<code>wrangler.json</code> sin tocar.
+			</div>
+
+			<h4>Secrets</h4>
+			<pre><code>npx wrangler secret put ADMIN_TOKEN      <span class="comentario"># acceso al backoffice</span>
+npx wrangler secret put SESSION_SECRET   <span class="comentario"># firma de la cookie</span>
+npx wrangler secret put WHATSAPP_NUMERO  <span class="comentario"># número del negocio</span></code></pre>
+			<p>
+				Los de producción son independientes de <code>.dev.vars</code> — no tienen por qué coincidir,
+				y no deberían. <code>wrangler secret put</code> funciona contra un Worker que todavía no
+				existe, así que se pueden dejar listos antes del primer despliegue.
+			</p>
+
+			<h4>Migraciones y despliegue</h4>
+			<pre><code>npx wrangler d1 migrations apply libreria-fiestita-loca --local
+npx wrangler d1 migrations apply libreria-fiestita-loca --remote
+
+npm run check    <span class="comentario"># tsc + build + deploy --dry-run  (gate previo)</span>
+npm run deploy
+npx wrangler tail</code></pre>
+
+			<p>
+				<code>npm run check</code> es la verificación completa. Antes de dar por terminado un cambio:
+				<code>lint</code>, <code>test</code> y <code>check</code>, los tres en verde.
+			</p>
+		</section>
+
+		<!-- ========================================= 09 PRESUPUESTOS -->
+
+		<section id="presupuestos">
+			<div class="cabeza">
+				<span class="cabeza__num">09</span>
+				<h2>Presupuestos y límites</h2>
+			</div>
+
+			<div class="tabla-caja">
+				<table>
+					<thead><tr><th>Qué</th><th>Límite</th><th>Cómo se verifica</th></tr></thead>
+					<tbody>
+						<tr><td>Bundle del catálogo</td><td>150 KB gzip</td><td>salida de <code>vite build</code></td></tr>
+						<tr><td>Cobertura</td><td>80% en las cuatro métricas</td><td><code>npm run test:cov</code>, con umbral configurado</td></tr>
+						<tr><td>Tamaño de archivo</td><td>200–400 líneas típico, 800 máximo</td><td>revisión</td></tr>
+						<tr><td>Foto de ejemplar</td><td>5 MB, JPEG/PNG/WebP</td><td><code>servicios/fotos.ts</code></td></tr>
+						<tr><td>Catálogo por página</td><td>24</td><td><code>datos/libros.ts</code></td></tr>
+						<tr><td>Libros por reserva</td><td>30</td><td>esquema Zod</td></tr>
+					</tbody>
+				</table>
+			</div>
+
+			<p>
+				El backoffice se carga con <code>lazy(() =&gt; import(…))</code> y queda en su propio chunk:
+				quien solo mira el catálogo no lo descarga. Vale la pena confirmarlo en la pestaña de red
+				después de tocar los imports, porque un import estático mal puesto lo arrastra sin avisar.
+			</p>
+
+			<h4>Restricciones del runtime que conviene tener presentes</h4>
+			<ul class="puntos">
+				<li><strong>workerd no es Node.</strong> No hay <code>fs</code>, ni <code>inspector</code>, ni la mayoría de los módulos nativos.</li>
+				<li><strong>D1 no tiene transacciones interactivas.</strong> Solo <code>batch()</code>.</li>
+				<li><strong>El Worker no tiene DOM.</strong> Nada de <code>document</code>, <code>localStorage</code> ni canvas del lado del servidor.</li>
+				<li><strong>El escáner de códigos necesita <code>BarcodeDetector</code></strong>, que hoy existe en Chrome Android. Donde no está, la interfaz cae al campo manual.</li>
+			</ul>
+		</section>
+
+		<p class="pie">
+			Fiestita Loca · Manual técnico. Los detalles con su contexto completo están en
+			<code>LEARNINGS.md</code>; las especificaciones de cada capacidad, en <code>openspec/</code>.
+			Cuando algo cueste más de lo razonable descubrirlo, agrégalo ahí.
+			<br><br>
+			Para lo que el sistema hace de cara a quien lo usa, ver el
+			<a href="manual-usuario.html">manual de usuario</a>.
+		</p>
+	</main>
+</div>
+
+</body>
+</html>

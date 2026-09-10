@@ -1,0 +1,1088 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Manual de uso de la plataforma de Librería Fiestita Loca: catálogo, reservas por WhatsApp y backoffice.">
+<title>Manual de Fiestita Loca</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;0,7..72,700;1,7..72,400&display=swap">
+
+<style>
+	/* Paleta heredada de la aplicación: papel cálido, tinta casi negra, rojo
+	   profundo de acento. El manual se parece a lo que documenta a propósito. */
+	:root {
+		--papel: oklch(96.5% 0.012 85);
+		--papel-alto: oklch(99.2% 0.006 85);
+		--papel-hondo: oklch(92.5% 0.018 82);
+		--tinta: oklch(22% 0.015 60);
+		--tinta-suave: oklch(45% 0.018 60);
+		--tinta-tenue: oklch(60% 0.015 60);
+		--borde: oklch(85% 0.02 80);
+		--borde-suave: oklch(90% 0.015 82);
+		--acento: oklch(45% 0.16 25);
+		--acento-claro: oklch(56% 0.17 25);
+		--acento-fondo: oklch(94% 0.03 30);
+		--verde: oklch(44% 0.11 150);
+		--verde-fondo: oklch(94% 0.04 150);
+		--ambar: oklch(48% 0.1 75);
+		--ambar-fondo: oklch(94% 0.05 85);
+		--sombra: 0 1px 2px oklch(0% 0 0 / 0.04), 0 12px 28px -18px oklch(0% 0 0 / 0.3);
+
+		--serif: "Literata", "Iowan Old Style", Palatino, Georgia, serif;
+		--sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+		--mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme="light"]) {
+			--papel: oklch(19% 0.012 60);
+			--papel-alto: oklch(23.5% 0.014 62);
+			--papel-hondo: oklch(15% 0.01 60);
+			--tinta: oklch(93% 0.008 85);
+			--tinta-suave: oklch(74% 0.012 70);
+			--tinta-tenue: oklch(58% 0.012 65);
+			--borde: oklch(32% 0.015 65);
+			--borde-suave: oklch(27% 0.012 62);
+			--acento: oklch(70% 0.15 25);
+			--acento-claro: oklch(78% 0.13 25);
+			--acento-fondo: oklch(27% 0.05 25);
+			--verde: oklch(72% 0.13 150);
+			--verde-fondo: oklch(25% 0.04 150);
+			--ambar: oklch(80% 0.12 75);
+			--ambar-fondo: oklch(26% 0.04 80);
+			--sombra: 0 1px 2px oklch(0% 0 0 / 0.3), 0 12px 28px -18px oklch(0% 0 0 / 0.7);
+		}
+	}
+
+	:root[data-theme="dark"] {
+		--papel: oklch(19% 0.012 60);
+		--papel-alto: oklch(23.5% 0.014 62);
+		--papel-hondo: oklch(15% 0.01 60);
+		--tinta: oklch(93% 0.008 85);
+		--tinta-suave: oklch(74% 0.012 70);
+		--tinta-tenue: oklch(58% 0.012 65);
+		--borde: oklch(32% 0.015 65);
+		--borde-suave: oklch(27% 0.012 62);
+		--acento: oklch(70% 0.15 25);
+		--acento-claro: oklch(78% 0.13 25);
+		--acento-fondo: oklch(27% 0.05 25);
+		--verde: oklch(72% 0.13 150);
+		--verde-fondo: oklch(25% 0.04 150);
+		--ambar: oklch(80% 0.12 75);
+		--ambar-fondo: oklch(26% 0.04 80);
+		--sombra: 0 1px 2px oklch(0% 0 0 / 0.3), 0 12px 28px -18px oklch(0% 0 0 / 0.7);
+	}
+
+	* { box-sizing: border-box; }
+
+	body {
+		background: var(--papel);
+		color: var(--tinta);
+		font-family: var(--serif);
+		font-size: 1rem;
+		line-height: 1.65;
+		margin: 0;
+		padding-inline: clamp(1rem, 4vw, 2.5rem);
+		padding-block: 0;
+		/* Grano de papel muy tenue, el mismo gesto que el sitio. */
+		background-image: repeating-linear-gradient(0deg, transparent 0 3px, oklch(50% 0 0 / 0.012) 3px 4px);
+	}
+
+	.envoltura {
+		display: grid;
+		gap: clamp(2rem, 5vw, 4rem);
+		grid-template-columns: 14rem minmax(0, 1fr);
+		margin-inline: auto;
+		max-width: 74rem;
+		padding-block: clamp(2rem, 5vw, 3.5rem) 5rem;
+	}
+
+	/* ------------------------------------------------------------- Índice */
+
+	.indice {
+		align-self: start;
+		position: sticky;
+		top: 1.5rem;
+	}
+
+	.marca {
+		border-bottom: 1px solid var(--borde);
+		margin-bottom: 1.25rem;
+		padding-bottom: 1rem;
+	}
+
+	.marca__nombre {
+		display: block;
+		font-size: 1.375rem;
+		font-weight: 700;
+		letter-spacing: -0.015em;
+		line-height: 1.1;
+	}
+
+	.marca__rol {
+		color: var(--acento);
+		display: block;
+		font-family: var(--sans);
+		font-size: 0.6875rem;
+		letter-spacing: 0.16em;
+		margin-top: 0.35rem;
+		text-transform: uppercase;
+	}
+
+	.indice__grupo {
+		font-family: var(--sans);
+		font-size: 0.625rem;
+		font-weight: 600;
+		letter-spacing: 0.14em;
+		color: var(--tinta-tenue);
+		margin: 1.25rem 0 0.4rem;
+		text-transform: uppercase;
+	}
+
+	.indice__grupo:first-of-type { margin-top: 0; }
+
+	.indice ol {
+		display: flex;
+		flex-direction: column;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.indice a {
+		border-left: 2px solid transparent;
+		color: var(--tinta-suave);
+		display: block;
+		font-family: var(--sans);
+		font-size: 0.875rem;
+		padding: 0.3rem 0 0.3rem 0.7rem;
+		text-decoration: none;
+		transition: color 140ms, border-color 140ms;
+	}
+
+	.indice a:hover {
+		border-left-color: var(--acento);
+		color: var(--acento);
+	}
+
+	/* ------------------------------------------------------------ Portada */
+
+	.portada {
+		border-bottom: 2px solid var(--tinta);
+		margin-bottom: 2.5rem;
+		padding-bottom: 1.75rem;
+	}
+
+	h1 {
+		font-size: clamp(2rem, 1.4rem + 2.6vw, 3.25rem);
+		font-weight: 700;
+		letter-spacing: -0.025em;
+		line-height: 1.05;
+		margin: 0;
+		text-wrap: balance;
+	}
+
+	.portada__entrada {
+		color: var(--tinta-suave);
+		font-size: 1.0625rem;
+		margin: 1rem 0 0;
+		max-width: 58ch;
+	}
+
+	/* ----------------------------------------------------------- Secciones */
+
+	/* Las reglas de sección se atan a la medida del texto en vez de correr hasta
+	   el borde de la ventana: una línea que se extiende mucho más allá del último
+	   renglón deja de leerse como el cierre de ese bloque. */
+	.contenido { max-width: 46rem; min-width: 0; }
+
+	section { scroll-margin-top: 1.5rem; }
+
+	section + section { margin-top: 3.5rem; }
+
+	h2 {
+		border-bottom: 1px solid var(--borde);
+		font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+		font-weight: 700;
+		letter-spacing: -0.02em;
+		margin: 0 0 1.25rem;
+		padding-bottom: 0.6rem;
+		text-wrap: balance;
+	}
+
+	h3 {
+		font-size: 1.1875rem;
+		font-weight: 600;
+		letter-spacing: -0.01em;
+		margin: 2rem 0 0.6rem;
+		text-wrap: balance;
+	}
+
+	h4 {
+		font-family: var(--sans);
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.1em;
+		margin: 1.5rem 0 0.5rem;
+		text-transform: uppercase;
+		color: var(--tinta-tenue);
+	}
+
+	p { margin: 0 0 0.9rem; max-width: 64ch; }
+	p:last-child { margin-bottom: 0; }
+
+	/* Es el enunciado que gobierna todo lo demás, no la entrada de la primera
+	   sección: se separa con su propia regla para que no se lea pegado a ella. */
+	.entradilla {
+		border-bottom: 1px solid var(--borde);
+		color: var(--tinta-suave);
+		font-size: 1.125rem;
+		margin-bottom: 3rem;
+		max-width: 60ch;
+		padding-bottom: 2rem;
+	}
+
+	a { color: var(--acento); text-decoration-thickness: 1px; text-underline-offset: 0.16em; }
+	a:hover { color: var(--acento-claro); }
+
+	:focus-visible { outline: 2px solid var(--acento); outline-offset: 3px; }
+
+	/* Nombre exacto de un control de la aplicación. Va en la misma familia que
+	   usa la interfaz, para que se reconozca al buscarlo en pantalla. */
+	.ui {
+		background: var(--papel-hondo);
+		border-radius: 2px;
+		font-family: var(--sans);
+		font-size: 0.8125em;
+		font-weight: 600;
+		padding: 0.1em 0.4em;
+		white-space: nowrap;
+	}
+
+	.ruta, code {
+		color: var(--tinta-suave);
+		font-family: var(--mono);
+		font-size: 0.85em;
+	}
+
+	.folio {
+		font-family: var(--mono);
+		font-size: 0.9em;
+		letter-spacing: 0.04em;
+		white-space: nowrap;
+	}
+
+	/* ------------------------------------------------------------- Pasos */
+
+	ol.pasos {
+		counter-reset: paso;
+		display: flex;
+		flex-direction: column;
+		gap: 0.8rem;
+		list-style: none;
+		margin: 1rem 0;
+		padding: 0;
+	}
+
+	ol.pasos > li {
+		counter-increment: paso;
+		max-width: 62ch;
+		padding-left: 2.4rem;
+		position: relative;
+	}
+
+	ol.pasos > li::before {
+		align-items: center;
+		border: 1px solid var(--acento);
+		border-radius: 50%;
+		color: var(--acento);
+		content: counter(paso);
+		display: flex;
+		font-family: var(--sans);
+		font-size: 0.75rem;
+		font-weight: 600;
+		height: 1.55rem;
+		justify-content: center;
+		left: 0;
+		position: absolute;
+		top: 0.1rem;
+		width: 1.55rem;
+	}
+
+	ul.puntos {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		margin: 1rem 0;
+		max-width: 64ch;
+		padding-left: 1.15rem;
+	}
+
+	ul.puntos li::marker { color: var(--tinta-tenue); }
+
+	/* ------------------------------------------------------------- Avisos */
+
+	.nota {
+		border-left: 3px solid var(--borde);
+		color: var(--tinta-suave);
+		font-size: 0.9375rem;
+		margin: 1.25rem 0;
+		max-width: 62ch;
+		padding: 0.15rem 0 0.15rem 1rem;
+	}
+
+	.nota--ojo {
+		border-left-color: var(--ambar);
+		background: var(--ambar-fondo);
+		color: var(--tinta);
+		padding: 0.75rem 1rem;
+	}
+
+	.nota--cuidado {
+		border-left-color: var(--acento);
+		background: var(--acento-fondo);
+		color: var(--tinta);
+		padding: 0.75rem 1rem;
+	}
+
+	.nota strong { font-weight: 600; }
+
+	/* -------------------------------------------------------------- Tablas */
+
+	.tabla-caja {
+		margin: 1.25rem 0;
+		overflow-x: auto;
+	}
+
+	table {
+		border-collapse: collapse;
+		font-size: 0.9375rem;
+		min-width: 30rem;
+		width: 100%;
+	}
+
+	th, td {
+		border-bottom: 1px solid var(--borde-suave);
+		padding: 0.6rem 0.9rem 0.6rem 0;
+		text-align: left;
+		vertical-align: top;
+	}
+
+	th {
+		border-bottom-color: var(--borde);
+		color: var(--tinta-tenue);
+		font-family: var(--sans);
+		font-size: 0.6875rem;
+		font-weight: 600;
+		letter-spacing: 0.09em;
+		text-transform: uppercase;
+	}
+
+	td:first-child { font-weight: 600; padding-right: 1.25rem; }
+
+	/* ------------------------------------------------------------ Estados */
+
+	.pastilla {
+		border: 1px solid var(--borde);
+		border-radius: 2px;
+		color: var(--tinta-suave);
+		display: inline-block;
+		font-family: var(--sans);
+		font-size: 0.6875rem;
+		font-weight: 600;
+		letter-spacing: 0.06em;
+		padding: 0.1rem 0.45rem;
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+
+	.pastilla--pendiente { border-color: var(--ambar); color: var(--ambar); }
+	.pastilla--pagada { border-color: var(--verde); color: var(--verde); }
+	.pastilla--entregada { background: var(--tinta); border-color: var(--tinta); color: var(--papel); }
+	.pastilla--cancelada { color: var(--tinta-tenue); text-decoration: line-through; }
+
+	/* ------------------------------------------------------------- Fichas */
+
+	.ficha {
+		background: var(--papel-alto);
+		border: 1px solid var(--borde);
+		box-shadow: var(--sombra);
+		margin: 1.5rem 0;
+		padding: 1.1rem 1.25rem;
+	}
+
+	.ficha h4 { margin-top: 0; }
+
+	.ficha p:last-child { margin-bottom: 0; }
+
+	.rejilla {
+		display: grid;
+		gap: 0.75rem;
+		grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr));
+		margin: 1.25rem 0;
+	}
+
+	.mini {
+		border-top: 2px solid var(--borde);
+		padding-top: 0.6rem;
+	}
+
+	.mini__titulo {
+		font-family: var(--sans);
+		font-size: 0.8125rem;
+		font-weight: 600;
+		margin: 0 0 0.15rem;
+	}
+
+	.mini p {
+		color: var(--tinta-suave);
+		font-size: 0.875rem;
+		margin: 0;
+	}
+
+	/* Diagrama del ciclo de una reserva. */
+	.ciclo {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem 0.35rem;
+		align-items: center;
+		margin: 1.25rem 0;
+	}
+
+	.ciclo__flecha { color: var(--tinta-tenue); font-family: var(--sans); font-size: 0.8125rem; }
+
+	.pie {
+		border-top: 1px solid var(--borde);
+		color: var(--tinta-tenue);
+		font-size: 0.875rem;
+		margin-top: 4rem;
+		padding-top: 1.25rem;
+	}
+
+	@media (max-width: 60rem) {
+		.envoltura { grid-template-columns: 1fr; gap: 2rem; }
+		.indice { position: static; }
+		.indice ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		* { transition-duration: 0.01ms !important; }
+	}
+</style>
+
+<style>
+	html { color-scheme: light dark; -webkit-text-size-adjust: 100%; }
+	img { max-width: 100%; }
+	[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="envoltura">
+	<nav class="indice" aria-label="Índice del manual">
+		<div class="marca">
+			<span class="marca__nombre">Fiestita Loca</span>
+			<span class="marca__rol">Manual</span>
+		</div>
+
+		<p class="indice__grupo">Lo que ve tu clientela</p>
+		<ol>
+			<li><a href="#catalogo">El catálogo</a></li>
+			<li><a href="#ficha">La ficha de un libro</a></li>
+			<li><a href="#reservar">Cómo reservan</a></li>
+			<li><a href="#folio">Consultar por folio</a></li>
+		</ol>
+
+		<p class="indice__grupo">Tu backoffice</p>
+		<ol>
+			<li><a href="#entrar">Entrar</a></li>
+			<li><a href="#resumen">Resumen</a></li>
+			<li><a href="#ingresar">Ingresar libro</a></li>
+			<li><a href="#inventario">Inventario</a></li>
+			<li><a href="#pedidos">Pedidos</a></li>
+			<li><a href="#avisos">Avisos</a></li>
+			<li><a href="#novedades">Novedades</a></li>
+		</ol>
+
+		<p class="indice__grupo">Referencia</p>
+		<ol>
+			<li><a href="#tablas">Datos y formatos</a></li>
+			<li><a href="#limites">Lo que no hace</a></li>
+		</ol>
+	</nav>
+
+	<main class="contenido">
+		<header class="portada">
+			<h1>Manual de Fiestita Loca</h1>
+			<p class="portada__entrada">
+				Todo lo que el sistema puede hacer, en el orden en que lo vas a necesitar. Primero lo que
+				ve quien entra a mirar libros; después las seis secciones de tu backoffice.
+			</p>
+		</header>
+
+		<p class="entradilla">
+			El sistema parte de una idea que conviene tener presente en todo lo demás: <strong>cada libro
+			es un ejemplar único</strong>. No hay cantidades ni stock. Cuando alguien reserva un libro, ese
+			libro queda apartado y desaparece de la lista de disponibles hasta que lo entregues o canceles
+			la reserva.
+		</p>
+
+		<!-- ==================================================== PÚBLICO -->
+
+		<section id="catalogo">
+			<h2>El catálogo</h2>
+			<p>
+				Es la página de entrada, abierta para cualquiera. Muestra todos los libros que diste de
+				alta, ordenados del más recientemente ingresado al más antiguo, de a 24 por página.
+			</p>
+
+			<h3>Buscar</h3>
+			<p>
+				Una sola caja busca en título, autor e ISBN a la vez. No hace falta escribir bien las
+				tildes: buscar <em>garcia marquez</em> encuentra a García Márquez, y <em>allende</em>
+				encuentra a Allendé. Tampoco importan las mayúsculas.
+			</p>
+			<p>
+				También funciona a medias palabras: <em>cien años</em> encuentra <em>Cien años de
+				soledad</em>. Y el ISBN se puede escribir con guiones o sin ellos, da lo mismo.
+			</p>
+
+			<h3>Filtrar y ordenar</h3>
+			<div class="rejilla">
+				<div class="mini">
+					<p class="mini__titulo">Género</p>
+					<p>Se arma solo con los géneros que hayas escrito en tus libros.</p>
+				</div>
+				<div class="mini">
+					<p class="mini__titulo">Condición</p>
+					<p>Nuevo o usado.</p>
+				</div>
+				<div class="mini">
+					<p class="mini__titulo">Disponibilidad</p>
+					<p><span class="ui">Solo disponibles</span> esconde lo vendido y lo reservado.</p>
+				</div>
+				<div class="mini">
+					<p class="mini__titulo">Orden</p>
+					<p>Novedades primero, o precio de menor a mayor, o al revés.</p>
+				</div>
+			</div>
+			<p>
+				Los filtros se combinan entre sí y con la búsqueda. Abajo siempre dice cuántos libros
+				quedaron. Si te arrepientes, <span class="ui">Limpiar filtros</span> devuelve el catálogo
+				completo.
+			</p>
+
+			<div class="ficha">
+				<h4>Una búsqueda se puede compartir</h4>
+				<p>
+					Cada búsqueda y cada filtro quedan escritos en la dirección del navegador. Si buscas
+					«Borges», filtras por usado y copias la barra de direcciones, quien abra ese enlace ve
+					exactamente esos libros. Sirve para mandar una selección por WhatsApp sin escribir la
+					lista a mano.
+				</p>
+			</div>
+
+			<h3>Los libros vendidos siguen a la vista</h3>
+			<p>
+				Un libro vendido no desaparece: se muestra en gris con una cinta que dice
+				<strong>Vendido</strong>. Eso es a propósito — que se note que el catálogo se mueve. Quien
+				no quiera verlos usa el filtro de disponibilidad. Los que <em>sí</em> desaparecen del todo
+				son los que das de baja.
+			</p>
+		</section>
+
+		<section id="ficha">
+			<h2>La ficha de un libro</h2>
+			<p>
+				Cada ejemplar tiene su propia dirección, estable, del tipo
+				<span class="ruta">/libro/…</span>. Muestra imagen, título, autor, editorial, año, género,
+				condición, sinopsis y precio, más su estado.
+			</p>
+			<p>
+				Si está disponible aparece <span class="ui">Reservar este ejemplar</span>. Si no, en su
+				lugar hay una explicación de por qué no se puede.
+			</p>
+
+			<div class="ficha">
+				<h4>Al pegar el enlace en WhatsApp</h4>
+				<p>
+					La previsualización sale con el título del libro, el autor, el precio y la portada. No
+					tienes que escribir nada: pegas el enlace y se arma solo.
+				</p>
+			</div>
+		</section>
+
+		<section id="reservar">
+			<h2>Cómo reservan</h2>
+			<p>
+				Quien navega puede ir juntando libros de varias fichas antes de decidirse. La selección
+				queda guardada en su teléfono: puede cerrar la página, volver mañana y sigue ahí. El número
+				de libros elegidos aparece junto a <span class="ui">Mi reserva</span> arriba.
+			</p>
+
+			<ol class="pasos">
+				<li>Agrega los libros que quiere desde cada ficha.</li>
+				<li>Entra a <span class="ui">Mi reserva</span> y revisa el total.</li>
+				<li>Deja su nombre, su celular y, si quiere, una nota.</li>
+				<li>El sistema crea la reserva y le muestra un folio.</li>
+				<li>Un botón lo lleva a WhatsApp con el pedido ya escrito.</li>
+			</ol>
+
+			<p>
+				Ese mensaje prearmado te llega con el folio, cada libro con su autor y su precio, el enlace
+				a cada ficha, el total y la nota. No tiene que escribir nada.
+			</p>
+
+			<div class="nota nota--ojo">
+				<strong>Los libros quedan apartados desde el paso 4, no desde el mensaje.</strong> Si el
+				cliente cierra WhatsApp sin enviarte nada, la reserva igual está creada y la ves en
+				<span class="ui">Pedidos</span>. Nunca vas a perder una reserva porque alguien no completó
+				el envío.
+			</div>
+
+			<h3>Si dos personas piden el mismo libro</h3>
+			<p>
+				Gana quien confirma primero. A la segunda le aparece el aviso de qué libro dejó de estar
+				disponible, con la opción de quitarlo y seguir con el resto de su selección. No queda una
+				reserva a medias ni un libro bloqueado por una reserva que no existe.
+			</p>
+		</section>
+
+		<section id="folio">
+			<h2>Consultar por folio</h2>
+			<p>
+				El folio tiene la forma <span class="folio">FL-A2B3C</span>. Con él, y sin cuenta ni
+				contraseña, tu cliente entra a <span class="ruta">/reserva/FL-A2B3C</span> y ve en qué está
+				su pedido, qué libros incluye y el total.
+			</p>
+			<p>
+				También hay un buscador de folio, por si prefiere escribirlo. Da lo mismo si lo escribe en
+				minúsculas o sin el guion.
+			</p>
+
+			<div class="ficha">
+				<h4>Por qué el folio se ve raro</h4>
+				<p>
+					No lleva nunca cero ni la letra O, ni el uno ni la i. Está pensado para que se pueda
+					dictar por teléfono sin que nadie confunda un carácter con otro. Si alguien te dice que
+					su folio tiene un cero, es una O.
+				</p>
+			</div>
+
+			<p>
+				De su teléfono solo se muestran los últimos cuatro dígitos. Así, si el folio llega a manos
+				de otra persona, no se lleva el número de nadie.
+			</p>
+		</section>
+
+		<!-- ================================================= BACKOFFICE -->
+
+		<section id="entrar">
+			<h2>Entrar a tu backoffice</h2>
+			<p>
+				Está en <span class="ruta">/admin</span> y pide un token de acceso — tu contraseña. No hay
+				usuarios ni correos: es una sola llave.
+			</p>
+			<p>
+				Arriba tienes las seis secciones: <span class="ui">Resumen</span>,
+				<span class="ui">Ingresar libro</span>, <span class="ui">Inventario</span>,
+				<span class="ui">Pedidos</span>, <span class="ui">Avisos</span> y
+				<span class="ui">Novedades</span>.
+			</p>
+
+			<div class="nota nota--cuidado">
+				<strong>Si te equivocas cinco veces seguidas, el ingreso se bloquea quince minutos.</strong>
+				Es la protección contra quien ande probando contraseñas. Se libera solo; no hay nada que
+				hacer más que esperar.
+			</div>
+
+			<p>
+				Si alguna vez crees que tu token se filtró, se puede cambiar y eso cierra al instante
+				cualquier sesión abierta en cualquier dispositivo.
+			</p>
+		</section>
+
+		<section id="resumen">
+			<h2>Resumen</h2>
+			<p>
+				La primera pantalla. Arriba, en grande, el <strong>pendiente de cobro</strong>: la plata de
+				las reservas que ya tomaste pero todavía no entregaste. Es el número que más te conviene
+				mirar seguido.
+			</p>
+			<p>Debajo, dos filas de totales:</p>
+			<ul class="puntos">
+				<li><strong>Inventario</strong> — disponibles, reservados, vendidos y el total publicado.</li>
+				<li><strong>Reservas</strong> — cuántas hay pendientes, pagadas, entregadas y canceladas.</li>
+			</ul>
+			<p>Las tarjetas de reservas son enlaces: te llevan al listado de pedidos.</p>
+		</section>
+
+		<section id="ingresar">
+			<h2>Ingresar libro</h2>
+			<p>
+				Hay tres caminos según lo que tengas en la mano, y todos terminan en el mismo formulario.
+			</p>
+
+			<h3>1. Con la cámara</h3>
+			<p>
+				Si el botón <span class="ui">Escanear con la cámara</span> aparece, apuntas al código de
+				barras de la contratapa y listo: lee el ISBN, busca los datos y cierra la cámara sola.
+			</p>
+			<div class="nota">
+				El escáner necesita <strong>Chrome en Android</strong>. En otros navegadores el botón
+				simplemente no sale y usas el campo de ISBN, que siempre está disponible.
+			</div>
+
+			<h3>2. Escribiendo el ISBN</h3>
+			<p>
+				Tecleas el número de la contratapa y aprietas <span class="ui">Buscar datos</span>. El
+				sistema consulta dos bases bibliográficas y trae título, autor, editorial, año, género,
+				sinopsis y portada.
+			</p>
+
+			<h3>3. Sin ISBN</h3>
+			<p>
+				Para libros viejos, artesanales o sin código: <span class="ui">Ingresar sin ISBN</span> abre
+				el formulario en blanco.
+			</p>
+
+			<h3>Lo que pasa después</h3>
+			<p>
+				Todo lo que trajo la búsqueda es <strong>editable</strong>. Si el título viene en inglés, o
+				el género no te convence, lo corriges antes de guardar. Lo que sí tienes que poner tú es el
+				<strong>precio</strong> y la <strong>condición</strong>.
+			</p>
+
+			<div class="nota nota--ojo">
+				<strong>Si ya tienes un ejemplar con ese ISBN, te avisa.</strong> Pero no te lo impide:
+				puedes tener dos copias del mismo título a precios distintos, y cada una es un registro
+				aparte con su propia ficha.
+			</div>
+
+			<h4>La foto del ejemplar</h4>
+			<p>
+				Cuando guardas, aparece <span class="ui">Adjuntar foto del ejemplar</span>. Vale la pena:
+				una foto de <em>tu</em> libro, con su desgaste real, vende mejor que la portada de catálogo.
+				Si la subes, reemplaza a la portada en todas partes.
+			</p>
+			<p>
+				Acepta JPEG, PNG o WebP hasta 5 MB. Si el archivo no es una imagen de verdad, lo rechaza y
+				el libro conserva la que tenía.
+			</p>
+
+			<h3>Si las fuentes no responden</h3>
+			<p>
+				Si el ISBN no lo conoce nadie, o las bases están caídas, te lo dice y abre el formulario
+				igual, con lo que ya hubieras escrito intacto. Nunca te deja sin poder ingresar el libro.
+			</p>
+		</section>
+
+		<section id="inventario">
+			<h2>Inventario</h2>
+			<p>
+				Todos tus libros, incluidos los que diste de baja — que se muestran atenuados. Puedes
+				buscar por título, autor o ISBN y filtrar por condición y género.
+			</p>
+			<p>Cada fila abre la ficha de edición, donde puedes:</p>
+			<ul class="puntos">
+				<li>Cambiar cualquier dato, incluido el precio.</li>
+				<li>Subir o reemplazar la foto del ejemplar.</li>
+				<li>Dar el libro de baja.</li>
+			</ul>
+
+			<h3>Dar de baja</h3>
+			<p>
+				La baja es lógica: el libro desaparece del catálogo público pero se conserva acá, para que
+				las reservas viejas que lo incluyan sigan teniendo sentido.
+			</p>
+
+			<div class="nota nota--cuidado">
+				<strong>Un libro que está en una reserva pendiente o pagada no se puede dar de baja.</strong>
+				El sistema te dice el folio de la reserva que lo retiene. Editarlo sí puedes; darlo de baja,
+				no, hasta que esa reserva se entregue o se cancele.
+			</div>
+
+			<div class="ficha">
+				<h4>Cambiar el precio no altera las reservas hechas</h4>
+				<p>
+					El precio queda congelado en cada reserva al momento de crearse. Si subes el precio de un
+					libro que ya está reservado, esa persona sigue pagando lo que aceptó.
+				</p>
+			</div>
+		</section>
+
+		<section id="pedidos">
+			<h2>Pedidos</h2>
+			<p>
+				El listado de todas las reservas, de la más nueva a la más vieja, con folio, cliente,
+				teléfono, cantidad de libros, total y estado.
+			</p>
+			<p>
+				Las pestañas filtran por estado y el buscador acepta folio, nombre o teléfono. El teléfono
+				lo puedes escribir como quieras: <span class="folio">1234 5678</span> encuentra igual que
+				<span class="folio">+56 9 1234 5678</span>.
+			</p>
+
+			<div class="nota nota--ojo">
+				<strong>Las pendientes de más de siete días salen marcadas</strong> con una barra roja y una
+				etiqueta <span class="pastilla" style="border-color: var(--acento); color: var(--acento);">+7 días</span>.
+				Arriba te dice cuántas hay. Son las que conviene cerrar o liberar: cada una tiene un ejemplar
+				apartado sin cobrar.
+			</div>
+
+			<h3>El detalle</h3>
+			<p>
+				Al abrir una reserva ves los datos del cliente, su nota si dejó una, cada libro con su
+				precio congelado, el total y el historial de cambios con sus fechas. Hay un botón
+				<span class="ui">Escribirle por WhatsApp</span> que abre la conversación con un mensaje ya
+				redactado.
+			</p>
+
+			<h3>El ciclo de una reserva</h3>
+			<div class="ciclo">
+				<span class="pastilla pastilla--pendiente">Pendiente</span>
+				<span class="ciclo__flecha">→</span>
+				<span class="pastilla pastilla--pagada">Pagada</span>
+				<span class="ciclo__flecha">→</span>
+				<span class="pastilla pastilla--entregada">Entregada</span>
+				<span class="ciclo__flecha" style="margin-left: 0.75rem;">o en cualquier momento →</span>
+				<span class="pastilla pastilla--cancelada">Cancelada</span>
+			</div>
+
+			<p>
+				Solo se te ofrecen los botones que corresponden al estado actual, y cada uno pide
+				confirmación. Lo importante es lo que cada cambio le hace a tu stock:
+			</p>
+
+			<div class="tabla-caja">
+				<table>
+					<thead>
+						<tr>
+							<th>Acción</th>
+							<th>Qué pasa con la reserva</th>
+							<th>Qué pasa con los libros</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><span class="ui">Registrar pago</span></td>
+							<td>Pasa a pagada</td>
+							<td>Siguen reservados</td>
+						</tr>
+						<tr>
+							<td><span class="ui">Marcar como entregada</span></td>
+							<td>Se cierra, ya no admite cambios</td>
+							<td>Pasan a <strong>vendidos</strong></td>
+						</tr>
+						<tr>
+							<td><span class="ui">Cancelar reserva</span></td>
+							<td>Se cierra, ya no admite cambios</td>
+							<td>Vuelven al catálogo como <strong>disponibles</strong></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="nota">
+				No se puede entregar una reserva que no está pagada: primero registras el pago. Y una vez
+				entregada o cancelada, no hay vuelta atrás — el historial queda, pero el estado no se
+				reabre.
+			</div>
+		</section>
+
+		<section id="avisos">
+			<h2>Avisos</h2>
+			<p>
+				Cuando alguien busca algo y no lo encuentra, en vez de irse con las manos vacías puede
+				dejarte anotado qué buscaba y su celular. Esta sección es esa lista.
+			</p>
+
+			<p>Las solicitudes vienen en dos grupos:</p>
+			<ul class="puntos">
+				<li>
+					<strong>Llegaron</strong> — ya ingresaste un libro que coincide. Aparece con el libro al
+					lado y un botón <span class="ui">Avisarle</span>.
+				</li>
+				<li>
+					<strong>Todavía esperando</strong> — nadie ha traído nada que calce todavía.
+				</li>
+			</ul>
+
+			<p>
+				La coincidencia se detecta sola cuando das de alta un libro, cruzando lo que la persona
+				escribió contra el título y el autor. Da igual si te pidieron «bolaño» y el libro se llama
+				<em>2666</em>: lo encuentra.
+			</p>
+
+			<div class="nota nota--ojo">
+				<strong>El sistema nunca manda un mensaje por su cuenta.</strong>
+				<span class="ui">Avisarle</span> abre WhatsApp con el texto escrito, pero eres tú quien
+				decide y quien aprieta enviar. Nadie recibe nada sin que tú lo mandes.
+			</div>
+
+			<p>
+				Después de escribirle, <span class="ui">Marcar como avisada</span> la saca de tus
+				pendientes y la deja en la pestaña de avisadas. <span class="ui">Cerrar solicitud</span> la
+				archiva y hace que deje de buscar coincidencias nuevas.
+			</p>
+		</section>
+
+		<section id="novedades">
+			<h2>Novedades</h2>
+			<p>
+				Arma las piezas de Instagram de lo que ingresaste esta semana. Todo se genera en tu propio
+				teléfono o computador: no pasa por ningún servicio de diseño.
+			</p>
+
+			<ol class="pasos">
+				<li>
+					Elige el rango de fechas. Por omisión trae los últimos siete días, sin los vendidos ni
+					los dados de baja.
+				</li>
+				<li>
+					Marca cuáles entran. Las flechas <span class="ui">↑</span> <span class="ui">↓</span>
+					cambian el orden, y el número al lado dice qué lugar ocupa cada uno.
+				</li>
+				<li>
+					Mira la previsualización a la derecha. No es una maqueta: es exactamente la imagen que
+					se va a descargar.
+				</li>
+				<li>Descarga una pieza suelta, o todas juntas con el botón grande.</li>
+				<li>Copia el texto de la publicación y pégalo en Instagram.</li>
+			</ol>
+
+			<p>
+				Las piezas salen en 1080×1920, el formato de una historia, con la imagen del libro, título,
+				autor, precio y el nombre de la librería. Los archivos vienen numerados y con el nombre del
+				libro, así que los reconoces en tu carrete.
+			</p>
+
+			<div class="ficha">
+				<h4>Los libros sin foto también sirven</h4>
+				<p>
+					Si un libro no tiene imagen, su pieza se genera igual con un fondo con textura y el
+					monograma de la librería. El título, el autor y el precio se leen perfecto.
+				</p>
+			</div>
+
+			<p>
+				El texto de la publicación se arma solo con la lista de libros, sus precios y el enlace a tu
+				catálogo — pero es un punto de partida. Edítalo todo lo que quieras: lo que se copia al
+				portapapeles es lo que esté escrito en la caja, no el original.
+			</p>
+		</section>
+
+		<!-- ================================================== REFERENCIA -->
+
+		<section id="tablas">
+			<h2>Datos y formatos</h2>
+
+			<h4>Estados de un libro</h4>
+			<div class="tabla-caja">
+				<table>
+					<thead>
+						<tr><th>Estado</th><th>Qué significa</th><th>Se ve en el catálogo</th></tr>
+					</thead>
+					<tbody>
+						<tr><td>Disponible</td><td>Se puede reservar</td><td>Sí, reservable</td></tr>
+						<tr><td>Reservado</td><td>Alguien lo tiene apartado</td><td>Sí, marcado</td></tr>
+						<tr><td>Vendido</td><td>Entregado a su dueño</td><td>Sí, en gris</td></tr>
+						<tr><td>Dado de baja</td><td>Lo retiraste tú</td><td>No</td></tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h4>Qué acepta cada campo</h4>
+			<div class="tabla-caja">
+				<table>
+					<thead>
+						<tr><th>Campo</th><th>Formato</th><th>Nota</th></tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Precio</td>
+							<td>Pesos enteros</td>
+							<td>Sin puntos ni decimales. Tiene que ser mayor que cero.</td>
+						</tr>
+						<tr>
+							<td>Celular</td>
+							<td>Celular chileno</td>
+							<td>
+								Con o sin <span class="folio">+56</span>, con espacios o sin ellos. Los fijos no
+								sirven: todo el sistema funciona por WhatsApp.
+							</td>
+						</tr>
+						<tr>
+							<td>ISBN</td>
+							<td>10 o 13 dígitos</td>
+							<td>Con guiones o sin ellos. Si está mal tecleado, se guarda vacío.</td>
+						</tr>
+						<tr>
+							<td>Foto</td>
+							<td>JPEG, PNG o WebP</td>
+							<td>Hasta 5 MB.</td>
+						</tr>
+						<tr>
+							<td>Folio</td>
+							<td><span class="folio">FL-XXXXX</span></td>
+							<td>Sin ceros ni unos, para dictarlo sin confusiones.</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h4>Direcciones útiles</h4>
+			<div class="tabla-caja">
+				<table>
+					<thead><tr><th>Dirección</th><th>Qué es</th></tr></thead>
+					<tbody>
+						<tr><td><span class="ruta">/</span></td><td>El catálogo</td></tr>
+						<tr><td><span class="ruta">/reserva</span></td><td>La selección de quien está comprando</td></tr>
+						<tr><td><span class="ruta">/reserva/FL-…</span></td><td>Estado de una reserva por folio</td></tr>
+						<tr><td><span class="ruta">/admin</span></td><td>Tu backoffice</td></tr>
+					</tbody>
+				</table>
+			</div>
+		</section>
+
+		<section id="limites">
+			<h2>Lo que no hace</h2>
+			<p>
+				Conviene tenerlo claro para no esperar algo que no va a pasar:
+			</p>
+			<ul class="puntos">
+				<li>
+					<strong>No cobra.</strong> El pago lo coordinas tú por WhatsApp, como siempre.
+					<span class="ui">Registrar pago</span> es una anotación tuya, no una transacción.
+				</li>
+				<li>
+					<strong>No manda mensajes solo.</strong> Ni avisos, ni recordatorios, ni confirmaciones.
+					Todos los enlaces de WhatsApp abren la conversación con el texto escrito, pero enviar es
+					siempre una decisión tuya.
+				</li>
+				<li>
+					<strong>No maneja envíos ni direcciones.</strong> Las reservas se retiran en la librería.
+				</li>
+				<li>
+					<strong>No tiene usuarios.</strong> Un token, una llave. Si se la das a alguien, esa
+					persona puede hacer todo lo que puedes hacer tú.
+				</li>
+				<li>
+					<strong>No lleva cantidades.</strong> Dos copias del mismo título son dos registros
+					separados, cada uno con su precio, su foto y su estado.
+				</li>
+			</ul>
+		</section>
+
+		<p class="pie">
+			Fiestita Loca · Librería de usados, Limache. Si algo de este manual no coincide con lo que ves
+			en pantalla, manda la aplicación: ella es la que está bien.
+			<br><br>
+			Si lo que buscas es cómo está construido por dentro, ver el
+			<a href="manual-tecnico.html">manual técnico</a>.
+		</p>
+	</main>
+</div>
+</body>
+</html>

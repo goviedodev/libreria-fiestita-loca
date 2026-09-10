@@ -1,90 +1,130 @@
-# React + Vite + Hono + Cloudflare Workers
+# Librería Fiestita Loca
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/vite-react-template)
+Catálogo web y backoffice de una librería de usados en Limache. Corre entero sobre
+Cloudflare Workers: React + Vite en el cliente, Hono en el Worker, D1 para los datos y
+R2 para las imágenes.
 
-This template provides a minimal setup for building a React application with TypeScript and Vite, designed to run on Cloudflare Workers. It features hot module replacement, ESLint integration, and the flexibility of Workers deployments.
+## Qué hace
 
-![React + TypeScript + Vite + Cloudflare Workers](https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/fc7b4b62-442b-4769-641b-ad4422d74300/public)
+**Para quien visita** — un catálogo público con búsqueda, filtros y ficha por libro; una
+selección que sobrevive a las recargas; y una reserva que termina abriendo WhatsApp con
+el pedido ya escrito. Si lo que busca no está, deja su teléfono y le avisamos cuando
+llegue.
 
-<!-- dash-content-start -->
+**Para quien atiende** — ingesta de libros escaneando el código de barras o por ISBN,
+con los datos bibliográficos traídos de Google Books u OpenLibrary; gestión de pedidos
+con sus estados; los avisos pendientes de las búsquedas sin resultado; y la generación
+de las piezas de Instagram de las novedades de la semana.
 
-🚀 Supercharge your web development with this powerful stack:
+Cada libro es un ejemplar único, no un SKU con cantidad: es una librería de usados y
+casi todo su inventario es de copia única.
 
-- [**React**](https://react.dev/) - A modern UI library for building interactive interfaces
-- [**Vite**](https://vite.dev/) - Lightning-fast build tooling and development server
-- [**Hono**](https://hono.dev/) - Ultralight, modern backend framework
-- [**Cloudflare Workers**](https://developers.cloudflare.com/workers/) - Edge computing platform for global deployment
-
-### ✨ Key Features
-
-- 🔥 Hot Module Replacement (HMR) for rapid development
-- 📦 TypeScript support out of the box
-- 🛠️ ESLint configuration included
-- ⚡ Zero-config deployment to Cloudflare's global network
-- 🎯 API routes with Hono's elegant routing
-- 🔄 Full-stack development setup
-- 🔎 Built-in Observability to monitor your Worker
-
-Get started in minutes with local development or deploy directly via the Cloudflare dashboard. Perfect for building modern, performant web applications at the edge.
-
-<!-- dash-content-end -->
-
-## Getting Started
-
-To start a new project with this template, run:
-
-```bash
-npm create cloudflare@latest -- --template=cloudflare/templates/vite-react-template
-```
-
-A live deployment of this template is available at:
-[https://react-vite-template.templates.workers.dev](https://react-vite-template.templates.workers.dev)
-
-## Development
-
-Install dependencies:
+## Puesta en marcha
 
 ```bash
 npm install
+cp .dev.vars.example .dev.vars     # y edita los valores
+./run.sh                           # instala, migra y levanta en localhost:5173
 ```
 
-Start the development server with:
+`run.sh` deja el entorno listo antes de arrancar: dependencias, secrets locales y
+migraciones de D1. También acepta `./run.sh --check` (lint + tsc + build + dry-run, sin
+servidor) y `./run.sh --fresh` (reinstala y ofrece resetear la D1 local).
+
+Si prefieres hacerlo a mano:
 
 ```bash
+npx wrangler d1 migrations apply libreria-fiestita-loca --local
 npm run dev
 ```
 
-Your application will be available at [http://localhost:5173](http://localhost:5173).
+El backoffice está en `/admin` y pide el `ADMIN_TOKEN` de tu `.dev.vars`.
 
-## Production
+## Comandos
 
-Build your project for production:
+| Comando | Qué hace |
+|---|---|
+| `npm run dev` | servidor de desarrollo con HMR en `localhost:5173` |
+| `npm test` | suite completa (Worker + cliente) |
+| `npm run test:cov` | suite con reporte de cobertura (umbral: 80%) |
+| `npm run lint` | ESLint |
+| `npm run build` | `tsc -b && vite build` |
+| `npm run check` | **gate previo a commit**: tsc + build + `wrangler deploy --dry-run` |
+| `npm run deploy` | despliegue a producción |
+| `npm run cf-typegen` | regenera `worker-configuration.d.ts` desde `wrangler.json` |
+| `npx wrangler tail` | logs en vivo del Worker desplegado |
+
+## Infraestructura
+
+### Bindings
+
+Declarados en `wrangler.json` y tipados en `worker-configuration.d.ts` (generado):
+
+| Binding | Recurso | Para qué |
+|---|---|---|
+| `DB` | D1 `libreria-fiestita-loca` | libros, reservas, solicitudes |
+| `IMAGENES` | R2 `fiestita-loca-imagenes` | portadas y fotos de los ejemplares |
+| `ASSETS` | assets estáticos | el SPA compilado |
+
+Si agregas un binding, edita `wrangler.json` y corre `npm run cf-typegen` después.
+
+### Secrets
+
+Los tres son obligatorios. En local van en `.dev.vars` (que no se versiona); en
+producción se cargan uno por uno:
 
 ```bash
-npm run build
+npx wrangler secret put ADMIN_TOKEN        # acceso al backoffice
+npx wrangler secret put SESSION_SECRET     # firma de la cookie de sesión
+npx wrangler secret put WHATSAPP_NUMERO    # número del negocio, ej. 56912345678
 ```
 
-Preview your build locally:
+Rotar `SESSION_SECRET` invalida todas las sesiones abiertas al instante: es la forma de
+revocar el acceso si el token se filtra.
+
+### Migraciones
 
 ```bash
-npm run preview
+npx wrangler d1 migrations apply libreria-fiestita-loca --local     # desarrollo
+npx wrangler d1 migrations apply libreria-fiestita-loca --remote    # producción
+npx wrangler d1 execute libreria-fiestita-loca --remote --command ".tables"
 ```
 
-Deploy your project to Cloudflare Workers:
+Las migraciones viven en `migrations/` y se aplican en orden por nombre. Las pruebas las
+leen desde ahí y las aplican sobre una D1 efímera, así que una migración nueva se
+ejercita sola en la suite.
 
-```bash
-npm run build && npm run deploy
+## Estructura
+
+```
+src/
+├── shared/          tipos y validación compartidos entre cliente y Worker
+├── worker/
+│   ├── index.ts     composición del router Hono
+│   ├── rutas/       endpoints públicos y de /api/admin
+│   ├── datos/       acceso a D1, una función por operación
+│   ├── servicios/   ISBN, fotos, folio, sesión, previsualización
+│   └── middleware/  sesión y manejo de errores
+└── react-app/
+    ├── catalogo/    listado, filtros, ficha
+    ├── reserva/     selección, formulario, consulta por folio
+    ├── backoffice/  ingesta, inventario, pedidos, avisos, novedades
+    ├── lib/         cliente HTTP y carga de datos
+    └── ui/          marco común de las vistas públicas
 ```
 
-Monitor your workers:
+Los tipos viven en `src/shared/` y los importan ambos lados: un cambio de contrato rompe
+la compilación en vez de romper en producción. Los esquemas de validación están en
+archivos `*-esquemas.ts` aparte, para que el bundle del catálogo no cargue Zod.
 
-```bash
-npx wrangler tail
-```
+## Documentación
 
-## Additional Resources
-
-- [Cloudflare Workers Documentation](https://developers.cloudflare.com/workers/)
-- [Vite Documentation](https://vitejs.dev/guide/)
-- [React Documentation](https://reactjs.org/)
-- [Hono Documentation](https://hono.dev/)
+- **`docs/manual-usuario.html`** — cómo se usa el sistema, de cara a quien atiende la
+  librería: catálogo, reservas y las seis secciones del backoffice. Se abre con doble clic.
+- **`docs/manual-tecnico.html`** — cómo está armado y por qué: arquitectura, modelo de
+  datos, superficie de API, decisiones no obvias y las trampas de cada runtime.
+- **`CLAUDE.md`** — convenciones de código y flujo de trabajo.
+- **`LEARNINGS.md`** — hallazgos no obvios: trampas de D1, del enrutado de assets, del
+  pool de pruebas y de React 19. Vale la pena leerlo antes de pelear con una de esas
+  capas.
+- **`openspec/`** — las especificaciones de cada capacidad y el historial de cambios.
